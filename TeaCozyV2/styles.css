@@ -1,0 +1,142 @@
+body {
+    font-family: "Helvetica";
+    font-size: 22px;
+    color: seashell;
+    background-color: black;
+    opacity: 0.9;
+    margin: 0;
+    padding: 0;
+}
+
+section {
+    margin: 0 auto;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+    background-color: black;
+    border-bottom: 1px solid seashell;
+}
+
+nav {
+    height: 69px;
+    display: flex;
+    align-items: center;
+}
+
+nav ul li {
+    display: inline;
+    margin: 10px;
+}
+
+#logo {
+    padding-left: 10px;
+    flex-grow: 1;
+    height: 50px;
+}
+
+#logo_img {
+    height: 50px;
+}
+
+nav a {
+    color: white;
+}
+
+#mission {
+    display: flex;
+    align-items: center;
+    margin-top: 70px;
+    height: 700px;
+    max-width: 1200px;
+    background-image: url(https://content.codecademy.com/courses/freelance-1/unit-4/img-mission-background.jpg?_gl=1*1jq6dvs*_ga*NTk5NDI0NDU3LjE2OTIxNDExNTc.*_ga_3LRZM6TM9L*MTcwMTcwMDE3My4zNy4xLjE3MDE3MDAxNzYuNTcuMC4w);
+    background-position: center;
+}
+
+#mission_text {
+    width: 100%;
+    text-align: center;
+    background-color: black;
+}
+
+#featured {
+    max-width: 1000px;
+    text-align: center;
+    padding: 70px 0;
+}
+
+#tea_box {
+    display: flex;
+    justify-content: center;
+    flex-flow: wrap;
+}
+
+.tea_card {
+    display: flex;
+    flex-flow: column;
+    margin: 10px;
+}
+
+.tea_card img {
+    margin-bottom: 10px;
+    height: 200px;
+    width: 300px;
+}
+
+#locations {
+    padding-top: 80px;
+    text-align: center;
+    min-height: 500px;
+    max-width: 1200px;
+    background-image: url(https://content.codecademy.com/courses/freelance-1/unit-4/img-locations-background.jpg?_gl=1*1byw07m*_ga*NTk5NDI0NDU3LjE2OTIxNDExNTc.*_ga_3LRZM6TM9L*MTcwMTcwMDE3My4zNy4xLjE3MDE3MDAxNzYuNTcuMC4w);
+    background-position: center;
+    background-size: cover;
+}
+
+#locations h2 {
+    margin-bottom: 15px;
+}
+
+#location_box {
+    display: flex;
+    justify-content: center;
+    flex-flow: wrap;
+    align-content: space-around;
+}
+
+.location_card {
+    display: flex;
+    flex-direction: column;
+    align-items: space-between;
+    line-height: 2.5;
+    padding: 10px;
+    min-width: 300px;
+    margin: 20px 20px;
+    background-color: black;
+    opacity: 1;
+}
+
+.location_card h3 {
+    margin: 0;
+}
+
+footer {
+    text-align: center;
+}
+
+#footer_text {
+    height: 200px;
+}
+
+#footer_text a {
+    color: white;
+}
+
+#copyright {
+    float: left;
+    margin: 20px;
+    font-size: 0.5em;
+}

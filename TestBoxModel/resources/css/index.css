@@ -1,0 +1,106 @@
+* {
+    margin: 0;
+    border: 0px solid white;
+}
+
+body {
+    color: black;
+    opacity: 0.9;
+}
+
+nav {
+    height: 80px;
+    width: 100%;
+    background-color: black;
+    position: fixed;
+    top: 0px;
+    z-index: 1;
+    margin: auto;
+}
+
+nav a {
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+main {
+    position: relative;
+    width: 100%;
+    top: 80px;
+}
+
+nav ul {
+    margin: 0px 20px;
+    padding: 0;
+}
+
+nav li {
+    display: inline-block;
+    margin: 20px;
+    position: relative;
+    top: 10px;
+}
+
+#box1, #box3, #box5, #box7 {
+    height: 800px;
+    background-color: white;
+}
+
+#box2, #box4, #box6 {
+    height: 400px;
+    background-color: white;
+}
+
+#red, #orange, #yellow, #green, #blue, #purple {
+    opacity: 0.5;
+    z-index: 1;
+}
+
+#red {
+    background-color: red;
+    height: 20px;
+    position: sticky;
+    top: 80px;
+}
+
+#orange {
+    background-color: orange;
+    height: 20px;
+    position: sticky;
+    top: 100px;
+}
+
+#yellow {
+    background-color: yellow;
+    height: 20px;
+    position: sticky;
+    top: 120px;
+}
+
+#green {
+    background-color: green;
+    height: 20px;
+    position: sticky;
+    top: 140px;
+}
+
+#blue {
+    background-color: blue;
+    height: 20px;
+    position: sticky;
+    top: 160px;
+}
+
+#purple {
+    background-color: purple;
+    height: 20px;
+    position: sticky;
+    top: 180px;
+}
+
+p {
+    position: relative;
+    background-color: transparent;
+    padding: 10px;
+}

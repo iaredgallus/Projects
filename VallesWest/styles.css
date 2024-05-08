@@ -1,0 +1,411 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,700;1,400&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: white;
+}
+
+sup {
+    font-size: 0.5rem;
+}
+
+h2 {
+    font-size: 3rem;
+    width: 90%;
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: black;
+    font-family: 'Cabin';
+    color: white;
+}
+
+nav {
+    height: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.8);
+    font-size: 1.25rem;
+}
+
+#nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+}
+
+#nav-list li {
+    padding: 1rem 2rem;
+    display: inline-block;
+}
+
+#nav-list li a {
+    text-decoration: none;
+    color: white;
+}
+
+#nav-list li a:hover {
+    text-decoration: none;
+    color: rgba(255,255,255,0.5);
+}
+
+@media only screen and (max-width: 800px) {
+    nav {
+        font-size: 1rem;
+        height: 8rem;
+    }
+    #nav-list {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    #nav-list li {
+        padding: 0.5rem;
+        width: 6rem;
+        text-align: center;
+    }
+    #nav-list li a {
+        text-align: center;
+    }
+}
+
+section {
+    max-width: 1000px;
+    width: 100%;
+    padding: 8rem 0 0 0;
+}
+
+#mission {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    color: white;
+    background-image: url("./images/lobby.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#mission-overlay {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0, 0, 0, 0.5) 50%, rgba(0,0,0,0) 80%);
+}
+
+.mission-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem 0;
+    width: 95%;
+}
+
+#mission h1 {
+    font-size: 5rem;
+    display: inline;
+}
+
+#mission p {
+    display: inline;
+    width: 6rem;
+    font-size: 1rem;
+    margin-left: 1rem;
+    padding: 0.25rem;
+    border: 2px solid rgba(255,255,255,0.5);
+    text-align: center;
+    height: 2.75rem;
+    font-weight: bold;
+}
+
+#mission h2 {
+    display: block;
+    font-size: 3rem;
+    text-align: center;
+    font-style: italic;
+    margin: 0;
+    padding: 0;
+}
+
+@media only screen and (max-width: 800px) {
+    .mission-card {
+        flex-direction: column;
+        width: 100%;
+    }
+    #mission h1, #mission p {
+        text-align: center;
+        display: block;
+    }
+    #mission h1 {
+        font-size: 3rem;
+    }
+    #mission h2 {
+        font-size: 1.5rem;
+    }
+    #mission p {
+        padding: 0.25rem;
+        border: 2px solid white;
+        width: 10rem;
+        height: 1.25rem;
+    }
+}
+
+#banner {
+    height: 50vh;
+    background-image: url("./images/room-open.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    padding: 0;
+    margin: 8rem 0 0 0;
+}
+
+#about {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+#stay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+    background-color: rgba(148, 58, 13, 0.5);
+    background: linear-gradient(to top, rgba(145, 60, 15, 0.4), rgba(145, 60, 15, 0));
+}
+
+#stay-cards {
+    width: 90%;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#stay .card {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(145, 60, 15, 0));
+}
+
+#arthur {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+#arthur sup {
+    font-size: 1rem;
+}
+
+#arthur-cards {
+    padding: 3rem 0 0 0;
+    width: 90%;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#arthur .card {
+    background: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.3))
+}
+
+#explore {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+    background-color: rgba(220, 140, 35, 0.4);
+    background: linear-gradient(to bottom, rgba(220, 140, 35, 0.3), rgba(220, 140, 35, 0));
+    margin-bottom: 8rem;
+}
+
+#explore-intro {
+    text-align: center;
+    width: 100%;
+    letter-spacing: 2px;
+    margin: 1rem 0;
+    font-size: 1.5rem;
+}
+
+#explore-cards {
+    padding: 3rem 0 2rem 0;
+    width: 90%;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#explore .card {
+    background: linear-gradient(to top, rgba(220,140,35,0), rgba(220,140,35, 0.3))
+}
+
+@media only screen and (max-width: 800px) {
+    #explore-intro {
+        width: 90%;
+    }
+}
+
+#additional-info {
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+    padding: 4rem 0 0 0;
+    margin: 1rem 0;
+}
+
+#additional-super {
+    padding: 1rem;
+}
+
+#book {
+    padding: 0;
+    background-image: url("./images/room2.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+}
+
+#book-overlay {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0, 0, 0, 0.3) 50%, rgba(0,0,0,0) 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+#book h4 {
+    padding-bottom: 1rem;
+    font-size: 2rem;
+    text-align: center;
+    font-weight: 400;
+}
+
+#book p {
+    padding-top: 2rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+@media only screen and (max-width: 800px) {
+    #book p {
+        width: 90%;
+    }
+}
+
+footer {
+    width: 100%;
+    bottom: 0;
+    background-color: rgba(255,255,255,0.1);
+    margin: 0 0 0 0;
+}
+
+#company-info {
+    width: 100%;
+    margin: 3rem 0 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+}
+
+#company-info p {
+    display: inline-block;
+    width: 33%;
+    margin: 0 1rem;
+}
+
+#copyright {
+    text-align: left;
+}
+
+#contact {
+    text-align: center;
+}
+
+#address {
+    text-align: right;
+}
+
+@media only screen and (max-width: 800px) {
+    #company-info p {
+        margin: 0 0.25rem;
+    }
+}
+
+.image-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.intro {
+    margin: 2rem 0;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    width: 90%;
+}
+
+.card {
+    width: 250px;
+    margin: 1rem;
+    display: flex;
+    flex-flow: column;
+}
+
+img {
+    width: 100%;
+}
+
+.image-title {
+    text-align: center;
+}
+
+.image-text {
+    height: 100%;
+    padding: 1rem;
+    line-height: 1.5;
+    font-size: 1rem;
+}
+
+.superscript sup {
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+    width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+    .superscript {
+        margin: 1rem 0;
+    }
+    .superscript sup {
+        font-size: 0.9rem;
+    }
+}
+
+@media only screen and (max-width: 650px) {
+    #arthur-cards, #explore-cards, #stay-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+}

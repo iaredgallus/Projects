@@ -1,0 +1,131 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #ececec;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    display: grid;
+    align-items: center;
+    background-color: white;
+    text-align: center;
+    height: 200px;
+}
+
+main {
+    margin: 0px auto;
+    background-color: #ececec;
+    max-width: 1000px;
+    padding: 10px;
+}
+
+h1 {
+    font-family: 'Times New Roman', serif;
+    font-size: 36px;
+    font-style: italic;
+}
+
+h2 {
+    font-family: 'Georgia', serif;
+    font-size: 24px;
+    //margin: 20px 0;
+}
+
+p, ul li {
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+}
+
+section {
+    //border: 1px solid blue;
+    margin: 60px auto;
+}
+
+.card {
+    //border: 1px solid yellow;
+    display: inline-block;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+    color: black;
+}
+
+#colors #ivory {
+    background-color: ivory;
+    border: 2px solid rgba(255, 255, 240, 0.5);
+}
+
+#colors #mintcream {
+    background-color: mintcream;
+    border: 2px solid rgba(245, 255, 250, 0.5);
+}
+
+#colors #mistyrose {
+    background-color: mistyrose;
+    border: 2px solid rgba(255, 228, 225, 0.5);
+}
+
+#colors #plum {
+    background-color: plum;
+    border: 2px solid rgba(221, 160, 221, 0.5);
+}
+
+#colors #powderblue {
+    background: powderblue;
+    border: 2px solid rgba(176, 224, 230, 0.5);
+}
+
+#colors #thistle {
+    background-color: thistle;
+    border: 2px solid rgba(216, 191, 216, 0.5);
+}
+
+#fonts {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+#fonts .card {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+#fonts #georgia p {
+    font-family: 'Georgia';
+}
+
+#fonts #garamond p {
+    font-family: 'EB Garamond';
+}
+
+#fonts #times_new_roman p {
+    font-family: 'Times New Roman';
+}
+
+#text_styles .card {
+    color: #505050;
+    display: inline-block;
+    width: 300px;
+    height: 150px;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 0px;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 0.5);
+    //border: 1px solid red;
+    vertical-align: top;
+}
+
+#text_styles .card h1, #text_styles .card h2, #text_styles .card h3 {
+    font-size: 16px;
+}
+
+#h1 h1, #h2 h2, #p p {
+    margin: 0;
+}

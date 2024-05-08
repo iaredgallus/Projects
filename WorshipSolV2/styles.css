@@ -1,0 +1,410 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    font-family: 'Lato', 'Arial', sans-serif;
+}
+
+h1, h2, h3 {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: 4rem;
+    font-weight: bold;
+}
+
+h2 {
+    margin-bottom: 1rem;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+p {
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    font-size: 1rem;
+}
+
+section {
+    padding: 0;
+    max-width: 1000px;
+    width: 100%;
+}
+
+nav {
+    width: 100%;
+    height: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    /*background: linear-gradient(to bottom, rgba(0,0,0,0) 33%, rgba(0,0,0,0.1));*/
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: rgba(0,0,0,0.5);
+}
+
+nav a:hover {
+    color: black;
+}
+
+.h-image {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    max-width: 1000px;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#intro {
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    background-color: black;
+}
+
+#intro-h3 {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(0,0,0,1));
+}
+
+#intro-h3 h3, #religion-h3-top h3, #religion-h3-bottom h3 {
+    padding: 1rem;
+}
+
+#worship-sol {
+    max-width: 100%;
+    background-size: contain;
+    background-image: url("./images/nasa-sol-radiate.jpg");
+    height: 150vh;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#religion {
+    max-width: 100%;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#religion-h3-top {
+    width: 100%;
+    height: 50vh;
+    color: white;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.5));
+    padding-bottom: 1rem;
+}
+
+#religion-h3-bottom {
+    width: 100%;
+    height: 50vh;
+    color: rgba(255,255,255,0.65);
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0));
+    padding-top: 1rem;
+}
+
+#greater-container {
+    background-image: url("./images/yellow-sol-center.jpg");
+    color: rgba(100,100,0,0.7);
+}
+#greater {
+    padding: 1rem;
+}
+
+#create, #sustain, #guide, #worship {
+    padding: 8rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.cards {
+    display: flex;
+    justify-content: space-around;
+}
+
+.card {
+    /*border: 1px solid rgba(0,0,0,0.1);*/
+    width: 30%;
+    flex-grow: 1;
+    margin: 0 0.5rem;
+    height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.middle {
+    margin: 0 0;
+}
+
+#create {
+    background-color: rgba(137,84,113,0.05);
+    /*background: radial-gradient(circle at center, rgba(137, 84, 113, 0.2), rgba(255,255,255,1));*/
+}
+#sustain {
+    /*background-color: rgba(152, 191, 208, 0.1);*/
+    /*background: radial-gradient(circle at center, rgba(255, 231, 171, 0.3), rgba(255,255,255,1));*/
+}
+
+#guide {
+    background-color: rgba(0,0,0,0.03);
+}
+
+#worship {
+    padding: 0;
+}
+
+#create h2 {
+    color: rgba(31, 0, 94, 0.8);
+}
+
+#sustain h2 {
+    color: rgba(209, 82, 39, 0.8);
+}
+
+#pink-sol {
+    background-image: url("./images/pink-sol-v2.jpg");
+}
+#terra {
+    background-image: url("./images/terra.jpg");
+    color: white;
+}
+#astronaut {
+    background-image: url("./images/astronaut-v2.jpg");
+    color: white;
+}
+#plants {
+    background-image: url("./images/plants.jpg");
+}
+#rays {
+    background-image: url("./images/rays-v2.jpg");
+}
+#people {
+    background-image: url("./images/people-v3.jpg");
+}
+
+#people p {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(238, 220, 173, 0.476);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.double-cards {
+    display: flex;
+    margin: 0.5rem 0;
+}
+
+.double-card {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.pane {
+    width: 45%;
+    flex-grow: 1;
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+    text-align: center;
+    background-position: center;
+    background-size: cover;
+}
+
+.pane p {
+    padding: 0 2rem;
+}
+
+.pane-left {
+    margin: 0.5rem 0.25rem 0.5rem 0.5rem;
+}
+.pane-right {
+    margin: 0.5rem 0.5rem 0.5rem 0.25rem;
+}
+
+.pane ul {
+    text-align: center;
+    padding: 0 2rem;
+    margin: 0;
+    margin-top: 1rem;
+}
+
+.pane li {
+    text-align: left;
+}
+
+.overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#nebula {
+    background-image: url("./images/nebula.jpg");
+    color: white;
+}
+#nebula-overlay {
+    background: rgba(0,0,0,0.3);
+}
+#meteor {
+    background-image: url("./images/meteor.jpg");
+    color: white;
+}
+#meteor-overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0, 0.6), rgba(0,0,0,0));
+}
+#sol-rays-forest {
+    background-image: url("./images/sol-rays-forest.jpg");
+    color: black;
+}
+#sol-rays-forest-overlay {
+    background: rgba(255,255,255,0.6);
+}
+#mindful {
+    background-image: url("./images/mindful-v3.jpg");
+    color: white;
+}
+#sol-uv {
+    background-image: url("./images/sol-uv.jpg");
+    color: white;
+}
+#sol-uv-overlay {
+    background: rgba(0,0,0, 0.5);
+}
+#rainbow {
+    background-image: url("./images/rainbow-blue.jpg");
+    color: white;
+}
+#other-gods-container {
+    background-image: url("./images/cross-sunrise-v2.jpg");
+}
+
+#other-gods {
+    color: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+@media only screen and (max-width: 600px) {
+    #other-gods-container {
+        background-image: url("./images/cross-sunrise-mobile.jpg");
+        display: flex;
+        justify-content: end;
+    }
+    #other-gods {
+        width: 60%;
+        justify-content: end;
+        text-align: right;
+    }
+}
+
+#stonehenge-container {
+    background-image: url("./images/stonehenge-v2.jpg");
+}
+#stonehenge {
+    color: rgba(0,0,0,0.6);
+}
+
+#worship h3 {
+    padding: 1rem;
+}
+
+@media only screen and (max-width: 1000px) {
+    #worship-sol {
+        background-size: cover;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    .cards {
+        flex-direction: column;
+    }
+    .card {
+        width: 100%;
+        margin: 0;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    h1 {
+        font-size: 3rem;
+    }
+    h2 {
+        font-size: 2rem;
+    }
+    h3 {
+        font-size: 1.5rem;
+    }
+    .double-card {
+        flex-direction: column;
+    }
+    .pane {
+        width: 100%;
+        margin: 0;
+    }
+
+    nav li {
+        border: 1px solid rgb(250,250,250);
+        background-color: rgb(240,240,240);
+        padding: 0.5rem;
+        border-radius: 5px;
+    }
+
+    nav li a {
+        color: rgb(50,50,50);
+    }
+}
