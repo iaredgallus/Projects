@@ -1,21 +1,27 @@
-// TO DO: Add documentation for functions
+// README.md - describe project and superstructure of Nalo Sentences
 // TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka
+    // Under what circumstances? Not straightforward.
 // TO DO: Action types: ActionTransitiveAnimate (nalo, le, ne, lewi, me, fane, piro, faka, ti, te), ActionTransitiveInanimateLand (le, piro, royu, faka, tokta), ActionTransitiveFood (mo, lo, fe, piro, time, ti), 
     // ActionIntransitive (foro, to, ukto, uka, ika), ActionSpecial (pate mi o[s] ka)
 // TO DO: Split pronouns into P1, P2, P3
 // Add words to all inventories (ONGOING)
 
+// DONE: Add documentation for functions
 // DONE: Added ThemeActionLand, ThemeActionWater, ThemeActionSky
 // DONE: Added Adverbials to Movement and Action sentence types; currently at 33% random
 
-// Initialize the constituent parts of a sentence.
+/* ========== Initializing  constituent parts of SENTENCE. ========== */
+
 let source = '';
 let theme = '';
 let goal = '';
 let adverb = '';
 let sentenceType;
 
-/* ========== VOCABULARY LISTS ========== */
+/* ========== VOCABULARY ARRAYS (LISTS) ========== */
+
+// Words are organized into arrays based on semantic content. All array names are plural by convention.
+// Last array edit: 2024.06.04 (Tue)
 
 const actions = ['le', 'ne', 'nalo', 'to', 'ukto', 'uka', 'fe', 'ika', 'lewi', 'lo', 'me', 'mo', 'fane',
     'piro', 'royu', 'faka', 'puto', 'time', 'ti', 'te', 'tokta'];
@@ -53,7 +59,11 @@ const states = ['pta', 'we', 'wopfa', 'pti'];
 const tools = ['tiro', 'fore', 'tare', 'tiko', 'tuse', 'kela'];
 const weather = ['fafula', 'fapa', 'fula', 'lafu', 'talafu', 'faneufa', 'rafu', 'ufa', 'xefu'];
 
-/* ========== WORDS ========== */
+/* ========== WORD OBJECTS ========== */
+
+// Each Word Object contains a name string (just in case) and a root,
+// which is an array of all the vocabulary arrays (above) that semantically qualify
+// for that Word type.
 
 let wordAction = {
     name: 'wordAction',
@@ -136,10 +146,16 @@ let wordObjectNatureWater = {
     root: [objectsNatureWater]
 }
 
-/* ========== THEMES ========== */
+/* ========== THEME OBJECTS ========== */
+
+// Theme Objects are like Word Objects, except for that they stipulate what other parts of speech are allowed,
+// and which semantic vocabulary lists will satisfy that part of speech based on the limits of the Theme.
+
+// For example, a Tool can only be acted upon logically by an animal or human with agency, so the 'sources' attribute 
+// for Tool only includes the Pronoun and Animal arrays.
 
 let themeTool = {
-    name: 'wordTool',
+    name: 'themeTool',
     root: [tools],
     sources: [wordPronounAll, wordAnimalLand],
     goals: [wordObjectNatureLand, wordStates],
@@ -286,6 +302,9 @@ let themeActionWater = {
 
 /* ========== SENTENCE TYPES ========== */
 
+// Sentence types determine which types of words can serve as Themes.
+// It has a 'theme' attribute, which lists valid Theme Objects in an array.
+
  let sentenceAction = {
     name: 'sentenceAction',
     themes: [themeAction, themeActionLand, themeActionSky, themeActionWater]
@@ -304,9 +323,9 @@ let sentenceChange = {
 /* ========== FUNCTIONS ========== */
 
 /*
-Returns true or false at random.
-Params: none
-Returns: bool
+DOES:       Helper Function. Returns true or false at random.
+PARAMS:     none
+RETURNS:    bool
 */
 function trueFalse() {
      zeroOne = Math.floor(Math.random() * 2);
@@ -314,9 +333,9 @@ function trueFalse() {
 }
 
 /*
-Picks random sentence type.
-Params: none
-Returns: string
+DOES:       Picks a random sentence type.
+PARAMS:     none
+RETURNS:    string
 */
 function pickSentenceType() {
     randomNumber = Math.floor(Math.random() * 3);
@@ -330,9 +349,9 @@ function pickSentenceType() {
 }
 
 /*
-Picks a random theme type (a word of the right semantic value), appropriate to the sentence type.
-Params: sentenceType (string)
-Returns: Theme Object
+DOES:       Picks a random Theme Object (i.e. a broad semantic category) appropriate to the sentence type.
+PARAMS:     sentenceType (string)
+RETURNS:    Theme Object
 */
 function pickThemeType(sentenceType) {
     if (sentenceType == 'action') {
@@ -348,9 +367,10 @@ function pickThemeType(sentenceType) {
 }
 
 /*
-Picks an appropriate Source word, given a Theme.
-Params: themeType (Theme Object)
-Returns: array
+DOES:       Picks a random semantic vocabulary list to serve as a Sentence's SOURCE (i.e. the originator of an action),
+            given a designated THEME.
+PARAMS:     themeType (Theme Object)
+RETURNS:    array
 */
 function pickSourceType(themeType) {
     let maxSource = themeType.sources.length;
@@ -358,7 +378,12 @@ function pickSourceType(themeType) {
     return themeType.sources[randomSource];
 }
 
-
+/*
+DOES:       Picks a random semantic vocabulary list to serve as a Sentence's GOAL (i.e. receiver of an action),
+            given a designated THEME.
+PARAMS:     themeType (Theme Object)
+RETURNS:    array
+*/
 function pickGoalType(themeType) {
     let maxGoal = themeType.goals.length;
     //console.log('Number of Goals: ' + maxGoal);
@@ -367,6 +392,11 @@ function pickGoalType(themeType) {
     return themeType.goals[randomGoal];
 }
 
+/*
+DOES:       Picks a random but specific word to stand in as the Sentence's THEME.
+PARAMS:     themeType (Theme Object), senType (string)
+RETURNS:    string - a random word with theme particle appended
+*/
 function pickThemeWord(wordType, senType) {
     let maxRoot = wordType.root.length;
     let randomRoot = Math.floor(Math.random() * maxRoot);
@@ -376,17 +406,24 @@ function pickThemeWord(wordType, senType) {
     if (word[0] === 'u') {
         return word;
     } else {
-        /*
         // REMOVE 'A' OPTIONALLY
+        /*
         if (word[1] === 'a' && 'f'.includes(word[0])) {
             word = word[0] + word.slice(2);
         }
         */
+
+        // Add theme particle to the word
         word = 'o' + word;
     }
     return word;
 }
 
+/*
+DOES:       Picks a random but specific word to stand in as the Sentence's SOURCE.
+PARAMS:     themeType (Theme Object), senType (string)
+RETURNS:    string - a random word with source particle appended
+*/
 function pickSourceWord(wordType, senType) {
     let maxRoot = wordType.root.length;
     let randomRoot = Math.floor(Math.random() * maxRoot);
@@ -403,6 +440,11 @@ function pickSourceWord(wordType, senType) {
     return word;
 }
 
+/*
+DOES:       Picks a random but specific word to stand in as the Sentence's GOAL.
+PARAMS:     themeType (Theme Object), senType (string)
+RETURNS:    string - a random word with goal particle appended
+*/
 function pickGoalWord(wordType, senType) {
     let maxRoot = wordType.root.length;
     let randomRoot = Math.floor(Math.random() * maxRoot);
@@ -417,9 +459,9 @@ function pickGoalWord(wordType, senType) {
 }
 
 /*
-Picks an adverbial at random.
-Params: wordType (Theme Object), senType (string)
-Returns: string
+DOES:       Picks an adverbial at random. Will append adverbial + particle 33% of the time.
+PARAMS:     wordType (Theme Object), senType (string)
+RETURNS:    string - a random adverbial phrase with adverbial particle OR empty string
 */
 function pickAdverb(wordType, senType) {
     if (wordType.adverbials.length === 0) {
@@ -444,6 +486,12 @@ function pickAdverb(wordType, senType) {
     }
 }
 
+/*
+DOES:       Constructs a sentence by picking a Theme at random (Theme Object), then picking a random but logical
+            Source and Goal based on the chosen Theme, with optional Adjectives and Adverbials.
+PARAMS:     sentenceType (string)
+RETURNS:    string - a concatenation of all of the individual sentence part strings
+*/
 function buildSentence(sentenceType) {
     // Pick random Theme (Object) and word based on sentenceType.
     themeType = pickThemeType(sentenceType);
@@ -473,7 +521,9 @@ function buildSentence(sentenceType) {
     }
 }
 
+/* ========== MAIN PROGRAM ========== */
 function main() {
+    // Create n sentences (currently 8)
     for (let i = 0; i < 8; i++) {
         pickSentenceType();
         sentence = buildSentence(sentenceType);
