@@ -1,11 +1,13 @@
-// README.md - describe project and superstructure of Nalo Sentences
-// TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka
-    // Under what circumstances? Not straightforward.
+// TO DO: README.md - describe project and superstructure of Nalo Sentences
+// TO DO: Add words to all inventories (ONGOING)
+// TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka. Q: Under what circumstances? Not straightforward.
 // TO DO: Action types: ActionTransitiveAnimate (nalo, le, ne, lewi, me, fane, piro, faka, ti, te), ActionTransitiveInanimateLand (le, piro, royu, faka, tokta), ActionTransitiveFood (mo, lo, fe, piro, time, ti), 
     // ActionIntransitive (foro, to, ukto, uka, ika), ActionSpecial (pate mi o[s] ka)
-// TO DO: Split pronouns into P1, P2, P3
-// Add words to all inventories (ONGOING)
+// TO DO: Add in complex sentences
+// TO DO: Add to modes: ellide 'a' from the end of a mode if word[0] in 'ptfsxlrwy'
 
+// DONE: Add in modes
+// DONE: Split pronouns into P1, P2, P3
 // DONE: Add documentation for functions
 // DONE: Added ThemeActionLand, ThemeActionWater, ThemeActionSky
 // DONE: Added Adverbials to Movement and Action sentence types; currently at 33% random
@@ -33,7 +35,8 @@ const animalsSky = ['rifa', 'rifla', 'riflamohi', 'riflamohu', 'rifaupu'];
 const animalsWater = ['liko', 'rifla', 'riflamohi', 'riflamohu', 'rilayaki', 'li', 'fila'];
 const biomes = ['kifapla', 'kiisa', 'kihela', 'kiheku', 'kihela', 'kihexa', 'kira', 'xaseisa', 
     'xaseusa', 'xufula'];
-const modes = ['naka', 'peka', 'saroka'];
+const conjunctions = ['kwi', 'kyu', 'awi', 'asu', 'ayu', 'paxi', 'kaxu', 'asopeka'];
+const modes = ['naka', 'peka', 'saroka', 'tapeka', 'kipeka'];
 // OBJECTS
 const objectsNatureLand = ['xu', 'xa', 'ta', 'la', 'xe', 'ki', 'kipta', 'kilu', 'xo', 'raxa', 'raxu', 
     'rexu', 'retafila', 'kila', 'koksa', 'meyaki', 'kolesu', 'kolesi', 'lasi', 'laxu', 'puxa', 'puxu', 
@@ -157,6 +160,7 @@ let wordObjectNatureWater = {
 let themeTool = {
     name: 'themeTool',
     root: [tools],
+    mode: [],
     sources: [wordPronounAll, wordAnimalLand],
     goals: [wordObjectNatureLand, wordStates],
     adverbials: []  
@@ -225,6 +229,7 @@ let themePronoun3PP = {
 let themeAnimalLand = {
     name: 'themeAnimalLand',
     root: [animalsLand],
+    mode: [modes],
     sources: [wordPronounAll],
     goals: [wordObjectNatureLand],
     adverbials: [adverbialsTime]    
@@ -233,6 +238,7 @@ let themeAnimalLand = {
 let themeAnimalSky = {
     name: 'themeAnimalSky',
     root: [animalsSky],
+    mode: [modes],
     sources: [wordPronounAll],
     goals: [wordObjectNatureSky],
     adverbials: [adverbialsTime]
@@ -241,6 +247,7 @@ let themeAnimalSky = {
 let themeAnimalWater = {
     name: 'themeAnimalWater',
     root: [animalsWater],
+    mode: [modes],
     sources: [wordPronounAll],
     goals: [wordObjectNatureWater],
     adverbials: [adverbialsTime]
@@ -249,6 +256,7 @@ let themeAnimalWater = {
 let themeObjectNatureLand = {
     name: 'themeObjectNatureLand',
     root: [objectsNatureLand],
+    mode: [],
     sources: [wordPronounAll],
     goals: [wordObjectNatureLand, wordStates],
     adverbials: [adverbialsTime]
@@ -333,6 +341,23 @@ function trueFalse() {
 }
 
 /*
+DOES:       Helper function. Takes in any number between 0 and 100 as a parameter; returns 'true' at that
+            frequency (i.e. if n = 40, function will return true at 40% chance). Any number > 100 will default
+            to 100, and any number < 0 will default to 0.
+PARAMS:     n (any real number between 0 and 100)
+RETURNS:    bool (true n% of the time)
+*/
+function xPercent(n) {
+    if (n < 0) {
+        n = 0;
+    } else if (n > 100) {
+        n = 100;
+    }
+    let random100 = Math.random() * 100;
+    return n >= random100;
+}
+
+/*
 DOES:       Picks a random sentence type.
 PARAMS:     none
 RETURNS:    string
@@ -386,10 +411,27 @@ RETURNS:    array
 */
 function pickGoalType(themeType) {
     let maxGoal = themeType.goals.length;
-    //console.log('Number of Goals: ' + maxGoal);
     let randomGoal = Math.floor(Math.random() * maxGoal);
-    //console.log(themeType.goals[randomGoal]);
     return themeType.goals[randomGoal];
+}
+
+/*
+DOES:       Returns a modal word to be added to the beginning of a Theme.
+PARAMS:     themeType (Theme Object)
+RETURNS:    string
+*/
+function addMode(wordType) {
+    let maxMode = wordType.mode.length;
+    let randomMode = Math.floor(Math.random() * maxMode);
+    let maxArray = wordType.mode[randomMode].length;
+    let randomArray = Math.floor(Math.random() * maxArray);
+    let word = wordType.mode[randomMode][randomArray];
+    // Check that this array location exists
+    if (randomArray === undefined) {
+        return '';
+    } else {
+        return word;
+    }
 }
 
 /*
@@ -398,24 +440,38 @@ PARAMS:     themeType (Theme Object), senType (string)
 RETURNS:    string - a random word with theme particle appended
 */
 function pickThemeWord(wordType, senType) {
+    let mode = '';
     let maxRoot = wordType.root.length;
     let randomRoot = Math.floor(Math.random() * maxRoot);
     let maxArray = wordType.root[randomRoot].length;
     let randomArray = Math.floor(Math.random() * maxArray);
-    word = wordType.root[randomRoot][randomArray];
-    if (word[0] === 'u') {
-        return word;
-    } else {
-        // REMOVE 'A' OPTIONALLY
-        /*
-        if (word[1] === 'a' && 'f'.includes(word[0])) {
-            word = word[0] + word.slice(2);
-        }
-        */
+    let word = wordType.root[randomRoot][randomArray];
 
-        // Add theme particle to the word
+    if (senType === 'action') {
+        let protoMode;
+        // Adds mode 40% of the time
+        if (xPercent(40)) {
+            protoMode = addMode(wordType);
+            // Change 'ka' to 'ya' if root begins with 'k'
+            if (word[0] === 'k') {
+                let adjustedProtoMode = protoMode.substring(0, protoMode.length - 2) + 'ya';
+                mode = adjustedProtoMode;
+            } else {
+                mode = protoMode;
+            }
+        }
+    }
+
+    //console.log('MODE :' + mode + ' | WORD: ' + word);
+
+    word = mode + word;
+
+    if (word[0] === 'u') {
+        word = 'w' + word;
+    } else {
         word = 'o' + word;
     }
+
     return word;
 }
 
@@ -429,7 +485,7 @@ function pickSourceWord(wordType, senType) {
     let randomRoot = Math.floor(Math.random() * maxRoot);
     let maxArray = wordType.root[randomRoot].length;
     let randomArray = Math.floor(Math.random() * maxArray);
-    word = wordType.root[randomRoot][randomArray];
+    let word = wordType.root[randomRoot][randomArray];
     if (senType === 'change' || senType === 'movement') {
         if (word[0] === 'p') {
             word = 'wa' + word;
@@ -450,7 +506,7 @@ function pickGoalWord(wordType, senType) {
     let randomRoot = Math.floor(Math.random() * maxRoot);
     let maxArray = wordType.root[randomRoot].length;
     let randomArray = Math.floor(Math.random() * maxArray);
-    word = wordType.root[randomRoot][randomArray];
+    let word = wordType.root[randomRoot][randomArray];
     if (word[0] === 'k') {
         return 'ya' + word;
     } else {
@@ -470,7 +526,7 @@ function pickAdverb(wordType, senType) {
     }
     let word = '';
     let randomTo10 = Math.random() * 10;
-    if (randomTo10 < 3.33) {
+    if (xPercent(33)) {
         let maxRoot = wordType.adverbials.length;
         let randomRoot = Math.floor(Math.random() * maxRoot);
         let maxArray = wordType.adverbials[randomRoot].length;
@@ -493,27 +549,24 @@ PARAMS:     sentenceType (string)
 RETURNS:    string - a concatenation of all of the individual sentence part strings
 */
 function buildSentence(sentenceType) {
-    // Pick random Theme (Object) and word based on sentenceType.
     themeType = pickThemeType(sentenceType);
-    theme = pickThemeWord(themeType, sentenceType);
-    // Pick random Source (Object) and word based on themeType.
     sourceType = pickSourceType(themeType);
-    source = pickSourceWord(sourceType, sentenceType);
-    // Pick random Goal (Object) and word based on themeType.
     goalType = pickGoalType(themeType);
+
+    theme = pickThemeWord(themeType, sentenceType);
+    source = pickSourceWord(sourceType, sentenceType);
     goal = pickGoalWord(goalType, sentenceType);
-    // Add an adverb (optional)
     adverb = pickAdverb(themeType, sentenceType);
 
-    // DETERMINE SYNTAX / Put Parts in correct order (based on sentenceType)
+    // DETERMINE SYNTAX: Put Parts in correct order (based on sentenceType)
     if (sentenceType === 'action') {
         return `${theme} ${source}${adverb} ${goal}`;
     } else if (sentenceType === 'movement') {
-        // Randomly add a source 
-        if (trueFalse() === false) {
-            source = ''; // Delete source word
-        } else {
+        // Add a Source 50% of the time 
+        if (xPercent(50)) {
             source = source + ' ';
+        } else {
+            source = ''; // Delete source word
         }
         return `${theme}${adverb} ${source}${goal}`;
     } else if (sentenceType === 'change') {
