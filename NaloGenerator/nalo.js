@@ -3,9 +3,10 @@
 // TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka. Q: Under what circumstances? Not straightforward.
 // TO DO: Action types: ActionTransitiveAnimate (nalo, le, ne, lewi, me, fane, piro, faka, ti, te), ActionTransitiveInanimateLand (le, piro, royu, faka, tokta), ActionTransitiveFood (mo, lo, fe, piro, time, ti), 
     // ActionIntransitive (foro, to, ukto, uka, ika), ActionSpecial (pate mi o[s] ka)
-// TO DO: Add in complex sentences
-// TO DO: Add to modes: ellide 'a' from the end of a mode if word[0] in 'ptfsxlrwy'
+// TO DO: Add in complex, multi-clause sentences
+// TO DO: Check if theme and goal are the same word; decide how to handle that
 
+// DONE: Add to Them function: ellide 'a' from the end of a mode if word[0] in 'ptfsxlrwy'
 // DONE: Add in modes
 // DONE: Split pronouns into P1, P2, P3
 // DONE: Add documentation for functions
@@ -36,6 +37,7 @@ const animalsWater = ['liko', 'rifla', 'riflamohi', 'riflamohu', 'rilayaki', 'li
 const biomes = ['kifapla', 'kiisa', 'kihela', 'kiheku', 'kihela', 'kihexa', 'kira', 'xaseisa', 
     'xaseusa', 'xufula'];
 const conjunctions = ['kwi', 'kyu', 'awi', 'asu', 'ayu', 'paxi', 'kaxu', 'asopeka'];
+const emotions = ['suna', 'sina', 'isana', 'usana'];
 const modes = ['naka', 'peka', 'saroka', 'tapeka', 'kipeka'];
 // OBJECTS
 const objectsNatureLand = ['xu', 'xa', 'ta', 'la', 'xe', 'ki', 'kipta', 'kilu', 'xo', 'raxa', 'raxu', 
@@ -58,7 +60,10 @@ const pronouns1P2P = ['mimu', 'mimuru'];
 const pronouns3PS = ['ma', 'mapi']
 const pronouns3PP = ['uma', 'mama'];
 const qualities = ['isa', 'usa', 'ika', 'uka'];
-const states = ['pta', 'we', 'wopfa', 'pti'];
+const statesInanimate = ['pta', 'wopfa', 'pti', 'pla', 'psa', 'ifafka', 'ufafka', 'heku', 'iku', 'itu',
+    'utu', 'ki', 'sikle', 'sukle'];
+const statesAnimate = ['we', 'ye', 'ifafka', 'ufafka', 'pla', 'ufaro', 'ifaro', 'sule', 'sile', 'sune',
+    'sine', 'sufe', 'sife'];
 const tools = ['tiro', 'fore', 'tare', 'tiko', 'tuse', 'kela'];
 const weather = ['fafula', 'fapa', 'fula', 'lafu', 'talafu', 'faneufa', 'rafu', 'ufa', 'xefu'];
 
@@ -73,9 +78,14 @@ let wordAction = {
     root: [actions]
 }
 
-let wordStates = {
-    name: 'wordState',
-    root: [states]
+let wordStatesAnimate = {
+    name: 'wordStateAnimate',
+    root: [statesAnimate, emotions]
+}
+
+let wordStatesInanimate = {
+    name: 'wordStateInanimate',
+    root: [statesInanimate]
 }
 
 let wordTool = {
@@ -162,7 +172,7 @@ let themeTool = {
     root: [tools],
     mode: [],
     sources: [wordPronounAll, wordAnimalLand],
-    goals: [wordObjectNatureLand, wordStates],
+    goals: [wordObjectNatureLand, wordStatesInanimate],
     adverbials: []  
 }
 
@@ -175,7 +185,7 @@ let themePronoun1P = {
     prepositions: [],
     sources: [wordPronoun2P, wordPronoun3PP, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
-        wordAnimalSky, wordAnimalWater, wordAnimalLand]
+        wordAnimalSky, wordAnimalWater, wordAnimalLand, wordStatesAnimate]
 }
 
 let themePronoun1P2P = {
@@ -187,7 +197,7 @@ let themePronoun1P2P = {
     prepositions: [],
     sources: [wordPronoun3PP, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
-        wordAnimalSky, wordAnimalWater, wordAnimalLand]
+        wordAnimalSky, wordAnimalWater, wordAnimalLand, wordStatesAnimate]
 }
 
 let themePronoun2P = {
@@ -199,7 +209,7 @@ let themePronoun2P = {
     prepositions: [],
     sources: [wordPronoun1P, wordPronoun3PP, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
-        wordAnimalSky, wordAnimalWater, wordAnimalLand]
+        wordAnimalSky, wordAnimalWater, wordAnimalLand, wordStatesAnimate]
 }
 
 let themePronoun3PS = {
@@ -211,7 +221,7 @@ let themePronoun3PS = {
     prepositions: [],
     sources: [wordPronoun1P, wordPronoun1P2P, wordPronoun2P, wordPronoun3PP],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
-        wordAnimalSky, wordAnimalWater, wordAnimalLand]
+        wordAnimalSky, wordAnimalWater, wordAnimalLand, wordStatesAnimate]
 }
 
 let themePronoun3PP = {
@@ -223,7 +233,7 @@ let themePronoun3PP = {
     prepositions: [],
     sources: [wordPronoun1P, wordPronoun1P2P, wordPronoun2P, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
-        wordAnimalSky, wordAnimalWater, wordAnimalLand]
+        wordAnimalSky, wordAnimalWater, wordAnimalLand, wordStatesAnimate]
 }
 
 let themeAnimalLand = {
@@ -231,7 +241,7 @@ let themeAnimalLand = {
     root: [animalsLand],
     mode: [modes],
     sources: [wordPronounAll],
-    goals: [wordObjectNatureLand],
+    goals: [wordObjectNatureLand, wordStatesAnimate],
     adverbials: [adverbialsTime]    
 }
 
@@ -240,7 +250,7 @@ let themeAnimalSky = {
     root: [animalsSky],
     mode: [modes],
     sources: [wordPronounAll],
-    goals: [wordObjectNatureSky],
+    goals: [wordObjectNatureSky, wordStatesAnimate],
     adverbials: [adverbialsTime]
 }
 
@@ -249,7 +259,7 @@ let themeAnimalWater = {
     root: [animalsWater],
     mode: [modes],
     sources: [wordPronounAll],
-    goals: [wordObjectNatureWater],
+    goals: [wordObjectNatureWater, wordStatesAnimate],
     adverbials: [adverbialsTime]
 }
 
@@ -258,7 +268,7 @@ let themeObjectNatureLand = {
     root: [objectsNatureLand],
     mode: [],
     sources: [wordPronounAll],
-    goals: [wordObjectNatureLand, wordStates],
+    goals: [wordObjectNatureLand, wordStatesInanimate],
     adverbials: [adverbialsTime]
 }
 
@@ -452,11 +462,16 @@ function pickThemeWord(wordType, senType) {
         // Adds mode 40% of the time
         if (xPercent(40)) {
             protoMode = addMode(wordType);
-            // Change 'ka' to 'ya' if root begins with 'k'
             if (word[0] === 'k') {
+                // Change 'ka' to 'ya' if root begins with 'k'
                 let adjustedProtoMode = protoMode.substring(0, protoMode.length - 2) + 'ya';
                 mode = adjustedProtoMode;
+            } else if ('ptfsxlrwy'.includes(word[0])) {
+                // Omit final 'a' if root begins with: ptfsxlrwy
+                let adjustedProtoMode = protoMode.substring(0, protoMode.length - 1);
+                mode = adjustedProtoMode;
             } else {
+                // Send the full mode along for combination
                 mode = protoMode;
             }
         }
@@ -532,9 +547,7 @@ function pickAdverb(wordType, senType) {
         let maxArray = wordType.adverbials[randomRoot].length;
         let randomArray = Math.floor(Math.random() * maxArray);
         word = wordType.adverbials[randomRoot][randomArray];
-        //console.log('ADVERB: ' + word);
     }
-    //console.log('adverb: ' + word)
     if (word !== '') {
         return ' a' + word;
     } else {
