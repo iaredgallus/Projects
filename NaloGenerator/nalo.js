@@ -5,9 +5,10 @@
     // ActionIntransitive (foro, to, ukto, uka, ika), ActionSpecial (pate mi o[s] ka)
 // TO DO: Address 'or' conjunction (+ peka?) and 'if' conjunction (bound)
 
-// TO DO: Sort out use cases for different conjunctions; which Sources or Themes should carry over based on
-    // which sentenceTypes; buildSubordinateClause()
+// TO DO: Sort out semantic oddities with 'kaxu'
+// TO DO: Sort out use cases for other conjunctions; which Sources or Themes should carry over based on senType
 
+// DONE: Subordinate Clauses: General, kaxu
 // DONE: Add LOCATION / POSSESSION sentences
 // DONE: Check if theme and goal are the same word; decide how to handle that
 // DONE: Add to Them function: ellide 'a' from the end of a mode if word[0] in 'ptfsxlrwy'
@@ -16,15 +17,6 @@
 // DONE: Add documentation for functions
 // DONE: Added ThemeActionLand, ThemeActionWater, ThemeActionSky
 // DONE: Added Adverbials to Movement and Action sentence types; currently at 33% random
-
-/* ========== Initializing  constituent parts of SENTENCE. ========== */
-
-let source = '';
-let theme = '';
-let goal = '';
-let adverb = '';
-let sentenceTypeMain;
-let sentenceTypeSub;
 
 /* ========== VOCABULARY ARRAYS (LISTS) ========== */
 
@@ -183,12 +175,23 @@ let wordObjectNatureWater = {
 let themeTool = {
     name: 'themeTool',
     root: [tools],
-    mode: [],
+    mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
     possessors: [wordPronounAll, wordAnimalLand],
     sources: [wordPronounAll, wordAnimalLand],
     goals: [wordObjectNatureLand, wordStatesInanimate],
     adverbials: []  
+}
+
+let themeEmotion = {
+    name: 'themeEmotion',
+    root: [emotions],
+    mode: [modes],
+    locations: [],
+    possessors: [wordPronounAll, wordAnimalLand],
+    sources: [wordPronounAll],
+    goals: [wordPronounAll, wordAnimalLand, wordAnimalSky, wordAnimalWater],
+    adverbials: []
 }
 
 let themePronoun1P = {
@@ -242,7 +245,7 @@ let themePronoun3PS = {
     adverbials: [adverbialsTime],
     adjectives: [],
     prepositions: [],
-    sources: [wordPronoun1P, wordPronoun1P2P, wordPronoun2P, wordPronoun3PP],
+    sources: [wordPronoun1P, wordPronoun1P2P, wordPronoun2P],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
         wordAnimalSky, wordAnimalWater, wordAnimalLand, wordStatesAnimate]
 }
@@ -297,7 +300,7 @@ let themeAnimalWater = {
 let themeObjectNatureLand = {
     name: 'themeObjectNatureLand',
     root: [objectsNatureLand],
-    mode: [],
+    mode: [modes],
     locations: [wordObjectNatureLand, wordPronounAll],
     possessors: [wordPronounAll, wordAnimalLand],
     sources: [wordPronounAll],
@@ -426,16 +429,16 @@ PARAMS:     none
 RETURNS:    string
 */
 function pickSentenceType(sentenceType) {
-    randomNumber = Math.floor(Math.random() * 5);
-    if (randomNumber == 0) {
+    randomNumber = Math.random() * 10;
+    if (randomNumber <= 2.5) {
         sentenceType = 'action';
-    } else if (randomNumber == 1) {
+    } else if (randomNumber <= 5) {
         sentenceType = 'movement'; 
-    } else if (randomNumber == 2) {
+    } else if (randomNumber <= 7.5) {
         sentenceType = 'change';
-    } else if (randomNumber == 3) {
+    } else if (randomNumber <= 8.75) {
         sentenceType = 'possession';
-    } else if (randomNumber == 4) {
+    } else if (randomNumber <= 10) {
         sentenceType = 'location';
     }
 
@@ -513,39 +516,36 @@ function addMode(wordType) {
 }
 
 /*
-DOES:       Picks a random but specific word to stand in as the Sentence's THEME.
-PARAMS:     themeType (Theme Object), senType (string)
-RETURNS:    string - a random word with theme particle appended
+DOES:       Adds a mode to a theme under certain conditions: 40% of the time if given an Action sentence,
+            or 100% of the time if a specific Mode is provided.
+PARAMS:     wordType (Theme Object), senType (string), giveTheme (string), giveMode (string - OPTIONAL)
+RETURNS:    string - theme word combined with Mode word
 */
-function pickThemeWord(wordType, senType) {
+function pickMode(wordType, senType, giveTheme, giveMode = undefined) {
+    let word = giveTheme;
     let mode = '';
-    let maxRoot = wordType.root.length;
-    let randomRoot = Math.floor(Math.random() * maxRoot);
-    let maxArray = wordType.root[randomRoot].length;
-    let randomArray = Math.floor(Math.random() * maxArray);
-    let word = wordType.root[randomRoot][randomArray];
 
-    if (senType === 'action') {
+    // Adds mode 40% of the time to an Action Sentence, or 100% of the time if mode is given.
+    if ((senType === 'action' && xPercent(40)) || giveMode !== undefined) {
         let protoMode;
-        // Adds mode 40% of the time
-        if (xPercent(40)) {
+        if (giveMode !== undefined) {
+            protoMode = giveMode;
+        } else {
             protoMode = addMode(wordType);
-            if (word[0] === 'k') {
-                // Change 'ka' to 'ya' if root begins with 'k'
-                let adjustedProtoMode = protoMode.substring(0, protoMode.length - 2) + 'ya';
-                mode = adjustedProtoMode;
-            } else if ('ptfsxlrwy'.includes(word[0])) {
-                // Omit final 'a' if root begins with: ptfsxlrwy
-                let adjustedProtoMode = protoMode.substring(0, protoMode.length - 1);
-                mode = adjustedProtoMode;
-            } else {
-                // Send the full mode along for combination
-                mode = protoMode;
-            }
+        }
+        if (word[0] === 'k') {
+            // Change 'ka' to 'ya' if root begins with 'k'
+            let adjustedProtoMode = protoMode.substring(0, protoMode.length - 2) + 'ya';
+            mode = adjustedProtoMode;
+        } else if ('mnptfsxlrwy'.includes(word[0])) {
+            // Omit final 'a' if root begins with: mnptfsxlrwy
+            let adjustedProtoMode = protoMode.substring(0, protoMode.length - 1);
+            mode = adjustedProtoMode;
+        } else {
+            // Send the full mode along for combination
+            mode = protoMode;
         }
     }
-
-    //console.log('MODE :' + mode + ' | WORD: ' + word);
 
     word = mode + word;
 
@@ -558,10 +558,33 @@ function pickThemeWord(wordType, senType) {
     return word;
 }
 
+
+/*
+DOES:       Picks a random but specific word to stand in as the Sentence's THEME.
+PARAMS:     themeType (Theme Object), senType (string)
+RETURNS:    string - a random word with theme particle appended
+*/
+function pickThemeWord(wordType, senType = undefined, giveMode = undefined, giveTheme = undefined) {
+    let word = '';
+    let mode = '';
+
+    if (giveTheme !== undefined) {
+        word = giveTheme;
+    } else {
+        let maxRoot = wordType.root.length;
+        let randomRoot = Math.floor(Math.random() * maxRoot);
+        let maxArray = wordType.root[randomRoot].length;
+        let randomArray = Math.floor(Math.random() * maxArray);
+        word = wordType.root[randomRoot][randomArray];
+    }
+
+    return word;
+}
+
 /*
 DOES:       Picks a random but specific word to stand in as the Sentence's SOURCE.
-PARAMS:     themeType (Theme Object), senType (string)
-RETURNS:    string - a random word with source particle appended
+PARAMS:     themeType (Theme Object), senType (string).
+RETURNS:    string - a random word with source particle appended.
 */
 function pickSourceWord(wordType, senType) {
     let maxRoot = wordType.root.length;
@@ -693,7 +716,7 @@ DOES:       If Theme and Goal are the same noun, this function adds demonstrativ
 PARAMS:     None.
 RETURNS:    None; action is performed on globally scoped 'theme' and 'goal' if necessary.
 */
-function checkSameThemeGoal() {
+function checkSameThemeGoal(theme, goal) {
     let themeNoArticle = theme.substring(1);
     let goalNoArticle = goal.substring(2);
     if (themeNoArticle !== goalNoArticle) {
@@ -712,31 +735,62 @@ function checkSameThemeGoal() {
 DOES:       Constructs a sentence by picking a Theme at random (Theme Object), then picking a random but logical
             Source and Goal based on the chosen Theme, with optional Adjectives and Adverbials.
 PARAMS:     sentenceType (string), subordinate (bool)
+            giveTheme (string - OPTIONAL), giveSource (string - OPTIONAL), giveLocation (string - OPT.),
+            givePossessor (string - OPT.), giveGoal (string - OPTIONAL), giveMode (string - OPTIONAL),
+            giveThemeType (Theme Object - OPTIONAL), suppressAdverb (bool - OPTIONAL);
 RETURNS:    string - a concatenation of all of the individual sentence part strings
 */
-function buildSentence(sentenceType, subordinate, giveTheme, giveSource) {
+function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLocation, givePossessor, giveGoal,
+    giveMode, giveThemeType, suppressAdverb) {
+    /* === Initializing  constituent parts of SENTENCE. === */
+    let source = '';
+    let theme = '';
+    let goal = '';
+    let adverb = '';
     let sentence = '';
-    themeType = pickThemeType(sentenceType);
-    sourceType = pickSourceType(themeType);
-    goalType = pickGoalType(themeType);
+    let mode = '';
+    let location;
+    let possessor;
+    let themeType;
 
-    if (giveTheme != undefined) {
-        theme = giveTheme;
+    // Determine Theme type
+    if (giveThemeType !== undefined) {
+        themeType = giveThemeType;
     } else {
-        theme = pickThemeWord(themeType, sentenceType);
+        themeType = pickThemeType(sentenceType);
     }
-
-    if (giveSource != undefined) {
+    // Determine Source type
+    sourceType = pickSourceType(themeType);
+    // Determine Goal type
+    goalType = pickGoalType(themeType);
+    // Determine Theme word   
+    themeNoMode = pickThemeWord(themeType, sentenceType, giveMode, giveTheme);
+    // Add Mode to Theme word
+    theme = pickMode(themeType, sentenceType, themeNoMode, giveMode);
+    // Determine Source word
+    if (giveSource !== undefined) {
         source = giveSource;
     } else {
         source = pickSourceWord(sourceType, sentenceType);
     }
-    goal = pickGoalWord(goalType, sentenceType);
-    adverb = pickAdverb(themeType, sentenceType);
+    // Determine Goal word
+    if (giveGoal !== undefined) {
+        goal = giveGoal;
+    } else {
+        goal = pickGoalWord(goalType, sentenceType);
+    }
+    // Determine adverbial (n% chance of use)
+    if (suppressAdverb) {
+        adverb = '';
+    } else {
+        adverb = pickAdverb(themeType, sentenceType);
+    }
+    // Ensure that Theme and Goal are not identical
+        //console.log('SENTENCE: ' + sentenceType + ' | THEME: ' + theme + ' | GOAL: ' + goal);
+    checkSameThemeGoal(theme, goal);
 
-    checkSameThemeGoal();
-
-    // DETERMINE SYNTAX: Put Parts in correct order (based on sentenceType)
+    /* === DETERMINE SYNTAX === */
+    /* Put Parts in correct order based on sentenceType. */
     if (sentenceType === 'action') {
         sentence = `${theme} ${source}${adverb} ${goal}`;
     } else if (sentenceType === 'movement') {
@@ -750,31 +804,92 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource) {
     } else if (sentenceType === 'change') {
         sentence = `${source} ${theme} ${goal}`;
     } else if (sentenceType === 'location') {
-        let location = pickLocation(themeType);
+        if (giveLocation != undefined) {
+            location = giveLocation;
+        } else {
+            location = pickLocation(themeType);
+        }
         sentence = `${theme}${adverb} ${location}`;
     } else if (sentenceType === 'possession') {
-        let possessor = pickPossessor(themeType);
+        if (givePossessor != undefined) {
+            possessor = givePossessor;
+        } else {
+            possessor = pickPossessor(themeType);
+        }
         sentence = `${theme} ${possessor}`;
     }
 
+    /* === ADD SUBORDINATE CLAUSE === */
+    /* Optionally adds subordinate clause. */
     if (subordinate) {
+        // Do not recurse indefinitely.
         return sentence;
-    } else if (xPercent(0)) {
+    } else if (xPercent(30)) {
         // Subordinate clause optional, 30% chance *UPDATE LATER*
         let conjunction = pickConjunction();
+        //conjunction = 'kaxu';
+        let sentenceTypeSub;
         let sentenceSub;
-        sentenceTypeSub = pickSentenceType();
-        sentenceSub = buildSentence(sentenceTypeSub, true);
+
+        // Evaluate Conjunction:
+            // Pick sentence type based on Conjunction
+            // Feed in values to buildSentence based on Conjunction
+        // buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveGoal, giveLocation, givePossessor,
+            // giveMode, giveThemeType, suppressAdverb)
+        if (conjunction === 'kaxu') {
+            if (sentenceType === 'movement') {
+                sentenceTypeSub = 'action';
+                sentenceSub = buildSentence(sentenceTypeSub, true, undefined, themeNoMode, undefined, undefined,
+                    undefined, 'peka', undefined, false);
+            } else if (sentenceType === 'action') {
+                sentenceTypeSub = 'possession';
+                sentenceSub = buildSentence(sentenceTypeSub, true, undefined, undefined, undefined, undefined,
+                    source, 'peka', themeEmotion, false);
+            } else if (sentenceType === 'change') {
+                sentenceTypeSub = 'possession';
+                sentenceSub = buildSentence(sentenceTypeSub, true, undefined, undefined, undefined, undefined,
+                    undefined, 'peka', themeEmotion, false);
+            } else if (sentenceType === 'possession') {
+                sentenceTypeSub = 'movement';
+                sentenceSub = buildSentence(sentenceTypeSub, true, themeNoMode, undefined, undefined, undefined,
+                    possessor, 'peka', undefined, false);
+            } else if (sentenceType === 'location') {
+                sentenceTypeSub = 'possession';
+                sentenceSub = buildSentence(sentenceTypeSub, true, undefined, undefined, undefined, undefined,
+                    undefined, 'peka', themeEmotion, false);
+            }
+        /*
+        } else if (conjunction === 'paxi') {
+            sentenceTypeSub = ''
+            sentenceSub = buildSentence(sentenceTypeSub, true);
+        } else if (conjunction === 'kwi') {
+            sentenceTypeSub = ''
+            sentenceSub = buildSentence(sentenceTypeSub, true);
+        } else if (conjunction === 'kyu') {
+            sentenceTypeSub = ''
+            sentenceSub = buildSentence(sentenceTypeSub, true);           
+        } else if (conjunction === 'awi' || conjunction === 'ayu' || conjunction === 'asu') {
+            // Suppress adverbials
+            sentenceSub = buildSentence(sentenceTypeSub, true, suppressAdverb = true);
+        */
+        } else {
+            sentenceTypeSub = pickSentenceType();
+            sentenceSub = buildSentence(sentenceTypeSub, true);
+        }
+
+        // Add subordinate clause to main clause.
         sentence = sentence + ', ' + conjunction + ' ' + sentenceSub;
     }
+
+    // Final return
     return sentence;
 }
 
 /* ========== MAIN PROGRAM ========== */
 function main() {
     // Create n sentences (currently 8)
-    for (let i = 0; i < 8; i++) {
-        sentenceTypeMain = pickSentenceType();
+    for (let i = 0; i < 10; i++) {
+        let sentenceTypeMain = pickSentenceType();
         let sentenceMain = buildSentence(sentenceTypeMain, false);
         console.log(sentenceMain);
     }
