@@ -33,10 +33,13 @@ const animalsSky = ['fi', 'rifa', 'rifla', 'riflamohi', 'riflamohu', 'rifaupu'];
 const animalsWater = ['liko', 'rifla', 'riflamohi', 'riflamohu', 'rilayaki', 'li', 'fila'];
 const biomes = ['kifapla', 'kiisa', 'kihela', 'kiheku', 'kihela', 'kihexa', 'kira', 'xaseisa', 
     'xaseusa', 'xufula'];
+// PUT THESE INTO ARRAYS BELOW AFTER IMPLEMENTED
+const conjunctionsUnused = ['asupeka', 'paxi', 'kwi', 'kyu']
+// PUT THESE INTO ARRAYS BELOW AFTER IMPLEMENTED
 const conjunctionsBound = ['asupeka'];
-const conjunctionsFreeCause = ['paxi', 'kaxu'];
+const conjunctionsFreeCause = ['kaxu'];
 const conjunctionsFreeTime = ['ayu', 'awi', 'asu'];
-const conjunctionsSimple = ['kwi', 'kyu'];
+const conjunctionsSimple = [];
 const emotions = ['suna', 'sina', 'isana', 'usana'];
 const modes = ['naka', 'peka', 'saroka', 'tapeka', 'kipeka'];
 // OBJECTS
@@ -80,7 +83,7 @@ let wordAction = {
 
 let wordConjunction = {
     name: 'wordConjunction',
-    root: [conjunctionsSimple]
+    root: [conjunctionsFreeCause, conjunctionsFreeTime]
 }
 
 let wordStatesAnimate = {
@@ -802,7 +805,11 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
         }
         sentence = `${theme}${adverb} ${source}${goal}`;
     } else if (sentenceType === 'change') {
-        sentence = `${source} ${theme} ${goal}`;
+        if (subordinate) {
+            sentence = `${theme} ${source} ${goal}`;
+        } else {
+            sentence = `${source} ${theme} ${goal}`;
+        }
     } else if (sentenceType === 'location') {
         if (giveLocation != undefined) {
             location = giveLocation;
@@ -828,6 +835,7 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
         // Subordinate clause optional, 30% chance *UPDATE LATER*
         let conjunction = pickConjunction();
         //conjunction = 'kaxu';
+        //console.log('CONJUNCTION: ' + conjunction);
         let sentenceTypeSub;
         let sentenceSub;
 
@@ -867,18 +875,20 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
             sentenceSub = buildSentence(sentenceTypeSub, true);
         } else if (conjunction === 'kyu') {
             sentenceTypeSub = ''
-            sentenceSub = buildSentence(sentenceTypeSub, true);           
+            sentenceSub = buildSentence(sentenceTypeSub, true);      
+        */     
         } else if (conjunction === 'awi' || conjunction === 'ayu' || conjunction === 'asu') {
             // Suppress adverbials
-            sentenceSub = buildSentence(sentenceTypeSub, true, suppressAdverb = true);
-        */
+            sentenceTypeSub = pickSentenceType();
+            sentenceSub = buildSentence(sentenceTypeSub, true, undefined, undefined, undefined, undefined,
+                undefined, undefined, undefined, true);
         } else {
             sentenceTypeSub = pickSentenceType();
             sentenceSub = buildSentence(sentenceTypeSub, true);
         }
 
         // Add subordinate clause to main clause.
-        sentence = sentence + ', ' + conjunction + ' ' + sentenceSub;
+        sentence = sentence + ' ' + conjunction + ' ' + sentenceSub;
     }
 
     // Final return
