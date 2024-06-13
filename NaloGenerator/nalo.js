@@ -40,11 +40,11 @@ const conjunctionsBound = ['asupeka'];
 const conjunctionsFreeCause = ['kaxu'];
 const conjunctionsFreeTime = ['ayu', 'awi', 'asu'];
 const conjunctionsSimple = [];
-const emotions = ['suna', 'sina', 'isana', 'usana'];
+const emotions = ['suna', 'sina', 'isna', 'usna', 'ifna', 'ufna', 'kina', 'usna kaufa', 'sana kapo', 'pepa'];
 const modes = ['naka', 'peka', 'saroka', 'tapeka', 'kipeka'];
 // OBJECTS
 const objectsNatureLand = ['xu', 'xa', 'ta', 'la', 'xe', 'ki', 'kipta', 'kilu', 'xo', 'raxa', 'raxu', 
-    'rexu', 'retafila', 'kila', 'koksa', 'meyaki', 'kolesu', 'kolesi', 'lasi', 'laxu', 'puxa', 'puxu', 
+    'rexu', 'retafila', 'kila', 'koksa', 'meyaki', 'kolesu', 'kolesi', 'lasi', 'lasipko', 'laxu', 'puxa', 'puxu', 
     'taki', 'sa', 'tapsawo', 'toxa', 'xareti', 'xakihela', 'xase', 'xehela', 'xepu', 'xesu',
     'xese', 'xoxu', 'xuxerifa', 'xuxeti', 'xipo', 'xofota'];
 const objectsNatureSky = ['lefu', 'lesupa', 'lesuka', 'selesu', 'selesi', 'suhi', 'suhu', 'lesi', 'lesu', 
@@ -67,7 +67,8 @@ const statesInanimate = ['pta', 'wopfa', 'pti', 'pla', 'psa', 'ifafka', 'ufafka'
     'utu', 'ki', 'si', 'su'];
 const statesAnimate = ['we', 'ye', 'ifafka', 'ufafka', 'pla', 'ufaro', 'ifaro', 'sule', 'sile', 'sune',
     'sine', 'sufe', 'sife'];
-const tools = ['tiro', 'fore', 'tare', 'tiko', 'tuse', 'kela'];
+const tools = ['tiro', 'fore', 'tare', 'tiko', 'tixu', 'tuse'];
+const toolsFood = ['tarexo', 'kela', 'kelaxo']
 const weather = ['fafula', 'fapa', 'fula', 'lafu', 'talafu', 'faneufa', 'rafu', 'ufa', 'xefu'];
 
 /* ========== WORD OBJECTS ========== */
@@ -177,12 +178,12 @@ let wordObjectNatureWater = {
 
 let themeTool = {
     name: 'themeTool',
-    root: [tools],
+    root: [tools, toolsFood],
     mode: [modes],
-    locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
-    possessors: [wordPronounAll, wordAnimalLand],
+    locations: [wordObjectNatureWater, wordObjectNatureLand],
+    possessors: [wordPronounAll],
     sources: [wordPronounAll, wordAnimalLand],
-    goals: [wordObjectNatureLand, wordStatesInanimate],
+    goals: [wordStatesInanimate],
     adverbials: []  
 }
 
@@ -831,10 +832,10 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
     if (subordinate) {
         // Do not recurse indefinitely.
         return sentence;
-    } else if (xPercent(30)) {
+    } else if (xPercent(100)) {
         // Subordinate clause optional, 30% chance *UPDATE LATER*
         let conjunction = pickConjunction();
-        //conjunction = 'kaxu';
+        conjunction = 'kaxu';
         //console.log('CONJUNCTION: ' + conjunction);
         let sentenceTypeSub;
         let sentenceSub;
@@ -860,7 +861,7 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
             } else if (sentenceType === 'possession') {
                 sentenceTypeSub = 'movement';
                 sentenceSub = buildSentence(sentenceTypeSub, true, themeNoMode, undefined, undefined, undefined,
-                    possessor, 'peka', undefined, false);
+                    undefined, 'peka', undefined, false);
             } else if (sentenceType === 'location') {
                 sentenceTypeSub = 'possession';
                 sentenceSub = buildSentence(sentenceTypeSub, true, undefined, undefined, undefined, undefined,
