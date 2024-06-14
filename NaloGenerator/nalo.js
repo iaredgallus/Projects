@@ -4,10 +4,9 @@
 // TO DO: Action types: ActionTransitiveAnimate (nalo, le, ne, lewi, me, fane, piro, faka, ti, te), ActionTransitiveInanimateLand (le, piro, royu, faka, tokta), ActionTransitiveFood (mo, lo, fe, piro, time, ti), 
     // ActionIntransitive (foro, to, ukto, uka, ika), ActionSpecial (pate mi o[s] ka)
 // TO DO: Address 'or' conjunction (+ peka?) and 'if' conjunction (bound)
-
-// TO DO: Sort out semantic oddities with 'kaxu'
 // TO DO: Sort out use cases for other conjunctions; which Sources or Themes should carry over based on senType
 
+// DONE: Added the addition of random adjectives to host words. Currently set at 33% chance of adjectival add
 // DONE: Subordinate Clauses: General, kaxu
 // DONE: Add LOCATION / POSSESSION sentences
 // DONE: Check if theme and goal are the same word; decide how to handle that
@@ -25,7 +24,8 @@
 
 const actions = ['le', 'ne', 'nalo', 'to', 'ukto', 'uka', 'fe', 'ika', 'lewi', 'lo', 'me', 'mo', 'fane',
     'piro', 'royu', 'faka', 'puto', 'time', 'ti', 'te', 'tokta'];
-const adverbialsTime = ['suni', 'uka', 'yu', 'suyu', 'susu', 'lesupa', 'lesuka', 'suwo', 'suyo', 'se', 'su'];
+const adverbialsTime = ['suni', 'uka', 'yu', 'suyu', 'susu', 'lesupa', 'lesuka', 'suwo', 'suyo', 'lesi', 'lesu', 
+    'hesu'];
 // ANIMALS
 const animalsLand = ['ri', 'tipika', 'toro', 'naunau', 'timeka', 'rifla', 'rifa', 'riflamohi', 'riflamohu',
     'rita', 'rilayaki', 'ripu', 'rose', 'rosefne', 'rihepu', 'timekaxu', 'rifaupu'];
@@ -33,6 +33,7 @@ const animalsSky = ['fi', 'rifa', 'rifla', 'riflamohi', 'riflamohu', 'rifaupu'];
 const animalsWater = ['liko', 'rifla', 'riflamohi', 'riflamohu', 'rilayaki', 'li', 'fila'];
 const biomes = ['kifapla', 'kiisa', 'kihela', 'kiheku', 'kihela', 'kihexa', 'kira', 'xaseisa', 
     'xaseusa', 'xufula'];
+const colors = ['sularo', 'sulesu', 'sulero', 'surosa', 'sufu', 'suxa', 'surafu', 'sukolesi', 'sukolesu'];
 // PUT THESE INTO ARRAYS BELOW AFTER IMPLEMENTED
 const conjunctionsUnused = ['asupeka', 'paxi', 'kwi', 'kyu']
 // PUT THESE INTO ARRAYS BELOW AFTER IMPLEMENTED
@@ -40,7 +41,7 @@ const conjunctionsBound = ['asupeka'];
 const conjunctionsFreeCause = ['kaxu'];
 const conjunctionsFreeTime = ['ayu', 'awi', 'asu'];
 const conjunctionsSimple = [];
-const emotions = ['suna', 'sina', 'isna', 'usna', 'ifna', 'ufna', 'kina', 'usna kaufa', 'sana kapo', 'pepa'];
+const emotions = ['suna', 'sina', 'isna', 'usna', 'ifna', 'ufna', 'kina', 'usnakaufa', 'sanakapo', 'pepa', 'sana'];
 const modes = ['naka', 'peka', 'saroka', 'tapeka', 'kipeka'];
 // OBJECTS
 const objectsNatureLand = ['xu', 'xa', 'ta', 'la', 'xe', 'ki', 'kipta', 'kilu', 'xo', 'raxa', 'raxu', 
@@ -64,7 +65,7 @@ const pronouns3PS = ['ma', 'mapi']
 const pronouns3PP = ['uma', 'mama'];
 const qualities = ['isa', 'usa', 'ika', 'uka'];
 const statesInanimate = ['pta', 'wopfa', 'pti', 'pla', 'psa', 'ifafka', 'ufafka', 'heku', 'iku', 'itu',
-    'utu', 'ki', 'si', 'su'];
+    'utu', 'psi', 'psu'];
 const statesAnimate = ['we', 'ye', 'ifafka', 'ufafka', 'pla', 'ufaro', 'ifaro', 'sule', 'sile', 'sune',
     'sine', 'sufe', 'sife'];
 const tools = ['tiro', 'fore', 'tare', 'tiko', 'tixu', 'tuse'];
@@ -79,93 +80,110 @@ const weather = ['fafula', 'fapa', 'fula', 'lafu', 'talafu', 'faneufa', 'rafu', 
 
 let wordAction = {
     name: 'wordAction',
-    root: [actions]
+    root: [actions],
+    adjectives: []
 }
 
 let wordConjunction = {
     name: 'wordConjunction',
-    root: [conjunctionsFreeCause, conjunctionsFreeTime]
+    root: [conjunctionsFreeCause, conjunctionsFreeTime],
+    adjectives: []
 }
 
 let wordStatesAnimate = {
     name: 'wordStateAnimate',
-    root: [statesAnimate, emotions]
+    root: [statesAnimate, emotions],
+    adjectives: []
 }
 
 let wordStatesInanimate = {
     name: 'wordStateInanimate',
-    root: [statesInanimate]
+    root: [statesInanimate],
+    adjectives: []
 }
 
 let wordTool = {
     name: 'wordTool',
     root: [tools],
+    adjectives: [statesInanimate, colors]
 }
 
 let wordPronoun1P = {
     name: 'wordPronoun1P',
     root: [pronouns1P],
-    mode: [modes]
+    mode: [modes],
+    adjectives: [statesAnimate, emotions]
 }
 
 let wordPronoun1P2P = {
     name: 'wordPronoun1P2P',
     root: [pronouns1P2P],
-    mode: [modes]
+    mode: [modes],
+    adjectives: [statesAnimate, emotions]
 }
 
 let wordPronoun2P = {
     name: 'wordPronoun2P',
     root: [pronouns2P],
-    mode: [modes]
+    mode: [modes],
+    adjectives: [statesAnimate, emotions]
 }
 
 let wordPronoun3PS = {
     name: 'wordPronoun3PS',
     root: [pronouns3PS],
-    mode: [modes]
+    mode: [modes],
+    adjectives: [statesAnimate, emotions]
 }
 
 let wordPronoun3PP = {
     name: 'wordPronoun3PP',
     root: [pronouns3PP],
-    mode: [modes]
+    mode: [modes],
+    adjectives: [statesAnimate, emotions]
 }
 
 let wordPronounAll = {
     name: 'wordPronounAll',
     root: [pronounsAll],
-    mode: [modes]
+    mode: [modes],
+    adjectives: [statesAnimate, emotions]
 }
 
 let wordAnimalLand = {
     name: 'wordAnimalLand',
-    root: [animalsLand]   
+    root: [animalsLand],
+    adjectives: [statesAnimate, emotions]  
 }
 
 let wordAnimalSky = {
     name: 'wordAnimalSky',
-    root: [animalsSky]   
+    root: [animalsSky],
+    adjectives: [statesAnimate, emotions]   
 }
 
 let wordAnimalWater = {
     name: 'wordAnimalWater',
-    root: [animalsWater]   
+    root: [animalsWater],
+    adjectives: [statesAnimate, emotions] 
 }
 
 let wordObjectNatureLand = {
     name: 'wordObjectNatureLand',
-    root: [objectsNatureLand]
+    root: [objectsNatureLand],
+    adjectives: [statesInanimate, colors]
 }
 
 let wordObjectNatureSky = {
     name: 'wordObjectNatureSky',
-    root: [objectsNatureSky]
+    root: [objectsNatureSky],
+    adjectives: [statesInanimate, colors]
 }
 
 let wordObjectNatureWater = {
     name: 'wordObjectNatureWater',
-    root: [objectsNatureWater]
+    root: [objectsNatureWater],
+    adjectives: [statesInanimate, colors]
 }
 
 /* ========== THEME OBJECTS ========== */
@@ -179,6 +197,7 @@ let wordObjectNatureWater = {
 let themeTool = {
     name: 'themeTool',
     root: [tools, toolsFood],
+    adjectives: [colors, statesInanimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand],
     possessors: [wordPronounAll],
@@ -190,6 +209,7 @@ let themeTool = {
 let themeEmotion = {
     name: 'themeEmotion',
     root: [emotions],
+    adjectives: [],
     mode: [modes],
     locations: [],
     possessors: [wordPronounAll, wordAnimalLand],
@@ -201,11 +221,11 @@ let themeEmotion = {
 let themePronoun1P = {
     name: 'themePronoun1P',
     root: [pronouns1P],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
     possessors: [],
     adverbials: [adverbialsTime],
-    adjectives: [],
     prepositions: [],
     sources: [wordPronoun2P, wordPronoun3PP, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
@@ -215,11 +235,11 @@ let themePronoun1P = {
 let themePronoun1P2P = {
     name: 'themePronoun1P2P',
     root: [pronouns1P2P],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
     possessors: [],
     adverbials: [adverbialsTime],
-    adjectives: [],
     prepositions: [],
     sources: [wordPronoun3PP, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
@@ -229,11 +249,11 @@ let themePronoun1P2P = {
 let themePronoun2P = {
     name: 'themePronoun2P',
     root: [pronouns2P],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
     possessors: [],
     adverbials: [adverbialsTime],
-    adjectives: [],
     prepositions: [],
     sources: [wordPronoun1P, wordPronoun3PP, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
@@ -243,11 +263,11 @@ let themePronoun2P = {
 let themePronoun3PS = {
     name: 'themePronoun3PS',
     root: [pronouns3PS],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
     possessors: [],
     adverbials: [adverbialsTime],
-    adjectives: [],
     prepositions: [],
     sources: [wordPronoun1P, wordPronoun1P2P, wordPronoun2P],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
@@ -257,11 +277,11 @@ let themePronoun3PS = {
 let themePronoun3PP = {
     name: 'themePronoun3PP',
     root: [pronouns3PP],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordObjectNatureLand, wordAnimalLand, wordAnimalSky],
     possessors: [],
     adverbials: [adverbialsTime],
-    adjectives: [],
     prepositions: [],
     sources: [wordPronoun1P, wordPronoun1P2P, wordPronoun2P, wordPronoun3PS],
     goals: [wordObjectNatureLand, wordObjectNatureWater, wordObjectNatureSky, 
@@ -271,6 +291,7 @@ let themePronoun3PP = {
 let themeAnimalLand = {
     name: 'themeAnimalLand',
     root: [animalsLand],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureLand, wordPronounAll],
     possessors: [wordPronounAll],
@@ -282,6 +303,7 @@ let themeAnimalLand = {
 let themeAnimalSky = {
     name: 'themeAnimalSky',
     root: [animalsSky],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureSky, wordObjectNatureLand, wordObjectNatureWater],
     possessors: [wordPronounAll],
@@ -293,6 +315,7 @@ let themeAnimalSky = {
 let themeAnimalWater = {
     name: 'themeAnimalWater',
     root: [animalsWater],
+    adjectives: [emotions, statesAnimate],
     mode: [modes],
     locations: [wordObjectNatureWater, wordPronounAll],
     possessors: [wordPronounAll],
@@ -304,6 +327,7 @@ let themeAnimalWater = {
 let themeObjectNatureLand = {
     name: 'themeObjectNatureLand',
     root: [objectsNatureLand],
+    adjectives: [statesInanimate, colors],
     mode: [modes],
     locations: [wordObjectNatureLand, wordPronounAll],
     possessors: [wordPronounAll, wordAnimalLand],
@@ -315,6 +339,7 @@ let themeObjectNatureLand = {
 let themeAction = {
     name: 'themeAction',
     root: [actions],
+    adjectives: [],
     mode: [modes],
     adverbials: [adverbialsTime],
     locations: [wordObjectNatureWater, wordObjectNatureWater, wordObjectNatureSky],
@@ -329,6 +354,7 @@ let themeAction = {
 let themeActionLand = {
     name: 'themeActionLand',
     root: [actions],
+    adjectives: [],
     mode: [modes],
     adverbials: [adverbialsTime],
     locations: [wordObjectNatureLand],
@@ -342,6 +368,7 @@ let themeActionLand = {
 let themeActionSky = {
     name: 'themeActionSky',
     root: [actions],
+    adjectives: [],
     mode: [modes],
     adverbials: [adverbialsTime],
     locations: [wordObjectNatureSky],
@@ -356,6 +383,7 @@ let themeActionSky = {
 let themeActionWater = {
     name: 'themeActionWater',
     root: [actions],
+    adjectives: [],
     mode: [modes],
     adverbials: [adverbialsTime],
     locations: [wordObjectNatureWater],
@@ -562,10 +590,30 @@ function pickMode(wordType, senType, giveTheme, giveMode = undefined) {
     return word;
 }
 
+/*
+DOES:       Adds a random adjectival descriptor to a word at whatever chance rate specified.
+PARAMS:     wordType (Word Object), percent (real).
+RETURNS:    string (a random adjective, or empty).
+*/
+function addAdjective(wordType, percent) {
+        //console.log(wordType.name, wordType.adjectives.length);
+    let adjective = '';
+    // Adds adjective n% of the time that this function is called
+    if (xPercent(percent) && wordType.adjectives.length > 0) {
+        let maxArray = wordType.adjectives.length;
+        let randomArray = Math.floor(Math.random() * maxArray);
+        let maxWord = wordType.adjectives[randomArray].length;
+        let randomWord = Math.floor(Math.random() * maxWord);
+        adjective = ' ' + wordType.adjectives[randomArray][randomWord]; 
+    }
+        //console.log('ADJECTIVE: ' + adjective);
+    return adjective;
+}
+
 
 /*
 DOES:       Picks a random but specific word to stand in as the Sentence's THEME.
-PARAMS:     themeType (Theme Object), senType (string)
+PARAMS:     wordType (Word Object), senType (string)
 RETURNS:    string - a random word with theme particle appended
 */
 function pickThemeWord(wordType, senType = undefined, giveMode = undefined, giveTheme = undefined) {
@@ -582,12 +630,12 @@ function pickThemeWord(wordType, senType = undefined, giveMode = undefined, give
         word = wordType.root[randomRoot][randomArray];
     }
 
-    return word;
+    return word + addAdjective(wordType, 33);
 }
 
 /*
 DOES:       Picks a random but specific word to stand in as the Sentence's SOURCE.
-PARAMS:     themeType (Theme Object), senType (string).
+PARAMS:     wordType (Word Object), senType (string).
 RETURNS:    string - a random word with source particle appended.
 */
 function pickSourceWord(wordType, senType) {
@@ -596,6 +644,7 @@ function pickSourceWord(wordType, senType) {
     let maxArray = wordType.root[randomRoot].length;
     let randomArray = Math.floor(Math.random() * maxArray);
     let word = wordType.root[randomRoot][randomArray];
+
     if (senType === 'change' || senType === 'movement') {
         if (word[0] === 'p') {
             word = 'wa' + word;
@@ -603,12 +652,13 @@ function pickSourceWord(wordType, senType) {
             word = 'pa' + word;
         }
     }
-    return word;
+
+    return word + addAdjective(wordType, 33);
 }
 
 /*
 DOES:       Picks a random but specific word to stand in as the Sentence's GOAL.
-PARAMS:     themeType (Theme Object), senType (string)
+PARAMS:     wordType (Word Object), senType (string)
 RETURNS:    string - a random word with goal particle appended
 */
 function pickGoalWord(wordType, senType) {
@@ -617,10 +667,63 @@ function pickGoalWord(wordType, senType) {
     let maxArray = wordType.root[randomRoot].length;
     let randomArray = Math.floor(Math.random() * maxArray);
     let word = wordType.root[randomRoot][randomArray];
+
+    let adjective = addAdjective(wordType, 33);
+
     if (word[0] === 'k') {
-        return 'ya' + word;
+        return 'ya' + word + adjective;
     } else {
-        return 'ka' + word;
+        return 'ka' + word + adjective;
+    }
+}
+
+/*
+DOES:       Picks a random but specific word to stand in as the Sentence's POSSESSOR.
+PARAMS:     themeType (Theme Object), senType (string)
+RETURNS:    string - a random word with particle appended
+*/
+function pickPossessor(wordType, senType) {
+    let maxPossessor = wordType.possessors.length;
+    let randomPossessor = Math.floor(Math.random() * maxPossessor);
+    let wordPossessor = wordType.possessors[randomPossessor];
+
+    let maxRoot = wordPossessor.root.length;
+    let randomRoot = Math.floor(Math.random() * maxRoot);
+    let maxArray = wordPossessor.root[randomRoot].length;
+    let randomArray = Math.floor(Math.random() * maxArray);
+    let word = wordPossessor.root[randomRoot][randomArray];
+
+    //console.log('POSESSOR WORD: ' + word);
+
+    if (word !== undefined) {
+        return 'a' + word + addAdjective(wordType, 33);
+    } else {
+        return '';
+    }
+}
+
+/*
+DOES:       Picks a random but specific word to stand in as the Sentence's LOCATION.
+PARAMS:     themeType (Theme Object), senType (string)
+RETURNS:    string - a random word with particle appended
+*/
+function pickLocation(wordType, senType) {
+    let maxLocation = wordType.locations.length;
+    let randomLocation = Math.floor(Math.random() * maxLocation);
+    let wordLocation = wordType.locations[randomLocation];
+
+    let maxRoot = wordLocation.root.length;
+    let randomRoot = Math.floor(Math.random() * maxRoot);
+    let maxArray = wordLocation.root[randomRoot].length;
+    let randomArray = Math.floor(Math.random() * maxArray);
+    let word = wordLocation.root[randomRoot][randomArray];
+
+    //console.log('LOCATION WORD: ' + word);
+
+    if (word !== undefined) {
+        return 'a' + word + addAdjective(wordType, 33);
+    } else {
+        return '';
     }
 }
 
@@ -662,56 +765,6 @@ function pickConjunction() {
     let randomArray = Math.floor(Math.random() * maxArray);
     let word = wordConjunction.root[randomRoot][randomArray];
     return word;
-}
-
-/*
-DOES:       Picks a random but specific word to stand in as the Sentence's POSSESSOR.
-PARAMS:     themeType (Theme Object), senType (string)
-RETURNS:    string - a random word with particle appended
-*/
-function pickPossessor(wordType, senType) {
-    let maxPossessor = wordType.possessors.length;
-    let randomPossessor = Math.floor(Math.random() * maxPossessor);
-    let wordPossessor = wordType.possessors[randomPossessor];
-
-    let maxRoot = wordPossessor.root.length;
-    let randomRoot = Math.floor(Math.random() * maxRoot);
-    let maxArray = wordPossessor.root[randomRoot].length;
-    let randomArray = Math.floor(Math.random() * maxArray);
-    let word = wordPossessor.root[randomRoot][randomArray];
-
-    //console.log('POSESSOR WORD: ' + word);
-
-    if (word !== undefined) {
-        return 'a' + word;
-    } else {
-        return '';
-    }
-}
-
-/*
-DOES:       Picks a random but specific word to stand in as the Sentence's LOCATION.
-PARAMS:     themeType (Theme Object), senType (string)
-RETURNS:    string - a random word with particle appended
-*/
-function pickLocation(wordType, senType) {
-    let maxLocation = wordType.locations.length;
-    let randomLocation = Math.floor(Math.random() * maxLocation);
-    let wordLocation = wordType.locations[randomLocation];
-
-    let maxRoot = wordLocation.root.length;
-    let randomRoot = Math.floor(Math.random() * maxRoot);
-    let maxArray = wordLocation.root[randomRoot].length;
-    let randomArray = Math.floor(Math.random() * maxArray);
-    let word = wordLocation.root[randomRoot][randomArray];
-
-    //console.log('LOCATION WORD: ' + word);
-
-    if (word !== undefined) {
-        return 'a' + word;
-    } else {
-        return '';
-    }
 }
 
 /*
@@ -767,7 +820,7 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
     sourceType = pickSourceType(themeType);
     // Determine Goal type
     goalType = pickGoalType(themeType);
-    // Determine Theme word   
+    // Determine Theme word 
     themeNoMode = pickThemeWord(themeType, sentenceType, giveMode, giveTheme);
     // Add Mode to Theme word
     theme = pickMode(themeType, sentenceType, themeNoMode, giveMode);
@@ -832,10 +885,10 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
     if (subordinate) {
         // Do not recurse indefinitely.
         return sentence;
-    } else if (xPercent(100)) {
-        // Subordinate clause optional, 30% chance *UPDATE LATER*
+    } else if (xPercent(30)) {
+        /* ===== Subordinate clause optional, 30% chance. UPDATE WHEN DONE TESTING! ===== */
         let conjunction = pickConjunction();
-        conjunction = 'kaxu';
+        //conjunction = 'kaxu';
         //console.log('CONJUNCTION: ' + conjunction);
         let sentenceTypeSub;
         let sentenceSub;
@@ -901,6 +954,7 @@ function main() {
     // Create n sentences (currently 8)
     for (let i = 0; i < 10; i++) {
         let sentenceTypeMain = pickSentenceType();
+            //sentenceTypeMain = 'possession';
         let sentenceMain = buildSentence(sentenceTypeMain, false);
         console.log(sentenceMain);
     }
