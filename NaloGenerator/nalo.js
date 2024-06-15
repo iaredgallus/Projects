@@ -2,10 +2,13 @@
 // TO DO: Add words to all inventories (ONGOING)
 // TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka. Q: Under what circumstances? Not straightforward.
 // TO DO: Action types: ActionSpecial (pate mi o[s] ka)
+// TO DO: Create Themes for ActionTypes.
 // TO DO: Address 'or' conjunction (+ peka?) and 'if' conjunction (bound)
 // TO DO: Sort out use cases for other conjunctions; which Sources or Themes should carry over based on senType
 
-// DONE: Differentiated Actions into Action Types
+// DONE: removeAdjective function to send simpler theme into subordinate clauses (2024.06.15)
+// DONE: Differentiated Actions into Action Types (2024.06.15)
+// DONE: Updated adjectival-add chance to 20% (2024.06.15)
 // DONE: Added the addition of random adjectives to host words. Currently set at 33% chance of adjectival add
 // DONE: Subordinate Clauses: General, kaxu
 // DONE: Add LOCATION / POSSESSION sentences
