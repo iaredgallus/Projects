@@ -1,11 +1,11 @@
 // TO DO: README.md - describe project and superstructure of Nalo Sentences
 // TO DO: Add words to all inventories (ONGOING)
 // TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka. Q: Under what circumstances? Not straightforward.
-// TO DO: Action types: ActionTransitiveAnimate (nalo, le, ne, lewi, me, fane, piro, faka, ti, te), ActionTransitiveInanimateLand (le, piro, royu, faka, tokta), ActionTransitiveFood (mo, lo, fe, piro, time, ti), 
-    // ActionIntransitive (foro, to, ukto, uka, ika), ActionSpecial (pate mi o[s] ka)
+// TO DO: Action types: ActionSpecial (pate mi o[s] ka)
 // TO DO: Address 'or' conjunction (+ peka?) and 'if' conjunction (bound)
 // TO DO: Sort out use cases for other conjunctions; which Sources or Themes should carry over based on senType
 
+// DONE: Differentiated Actions into Action Types
 // DONE: Added the addition of random adjectives to host words. Currently set at 33% chance of adjectival add
 // DONE: Subordinate Clauses: General, kaxu
 // DONE: Add LOCATION / POSSESSION sentences
@@ -24,6 +24,11 @@
 
 const actions = ['le', 'ne', 'nalo', 'to', 'ukto', 'uka', 'fe', 'ika', 'lewi', 'lo', 'me', 'mo', 'fane',
     'piro', 'royu', 'faka', 'puto', 'time', 'ti', 'te', 'tokta'];
+const actionsTransitiveAnimate = ['nalo', 'le', 'ne', 'lewi', 'me', 'fane', 'piro', 'faka', 'ti', 'te', 
+    'tokta'];
+const actionsTransitiveInanimate = ['le', 'piro', 'royu', 'faka', 'tokta'];
+const actionsTransitiveFood = ['mo', 'lo', 'fe', 'piro', 'time', 'ti', 'xo', 'tuti'];
+const actionsIntransitive = ['to', 'ukto', 'uka', 'ika', 'foro'];
 const adverbialsTime = ['suni', 'uka', 'yu', 'suyu', 'susu', 'lesupa', 'lesuka', 'suwo', 'suyo', 'lesi', 'lesu', 
     'hesu'];
 // ANIMALS
@@ -81,6 +86,30 @@ const weather = ['fafula', 'fapa', 'fula', 'lafu', 'talafu', 'faneufa', 'rafu', 
 let wordAction = {
     name: 'wordAction',
     root: [actions],
+    adjectives: []
+}
+
+let wordActionTransitiveAnimate = {
+    name: 'wordActionTransitiveAnimate',
+    root: [actionsTransitiveAnimate],
+    adjectives: []
+}
+
+let wordActionTransitiveInanimate = {
+    name: 'wordActionTransitiveInanimate',
+    root: [actionsTransitiveInanimate],
+    adjectives: []
+}
+
+let wordActionTransitiveFood = {
+    name: 'wordActionTransitiveFood',
+    root: [actionsTransitiveFood],
+    adjectives: []
+}
+
+let wordActionIntransitive = {
+    name: 'wordActionIntransitive',
+    root: [actionsIntransitive],
     adjectives: []
 }
 
