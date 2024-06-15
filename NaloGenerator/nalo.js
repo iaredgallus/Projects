@@ -46,7 +46,9 @@ const conjunctionsBound = ['asupeka'];
 const conjunctionsFreeCause = ['kaxu'];
 const conjunctionsFreeTime = ['ayu', 'awi', 'asu'];
 const conjunctionsSimple = [];
-const emotions = ['suna', 'sina', 'isna', 'usna', 'ifna', 'ufna', 'kina', 'usnakaufa', 'sanakapo', 'pepa', 'sana'];
+const emotions = ['suna', 'sina', 'isna', 'usna', 'ifna', 'ufna', 'kina', 'usnakaufa', 'sanakapo', 'pepa', 'sana',
+    'peksi', 'peksu', 'sanaksi', 'sanaksu', 'peka', 'pepaisna', 'pepausna', 'yoisna', 'nakxo', 'nakla', 'yosna',
+    'yousna', 'naksu', 'naksi'];
 const modes = ['naka', 'peka', 'saroka', 'tapeka', 'kipeka'];
 // OBJECTS
 const objectsNatureLand = ['xu', 'xa', 'ta', 'la', 'xe', 'ki', 'kipta', 'kilu', 'xo', 'raxa', 'raxu', 
@@ -71,8 +73,10 @@ const pronouns3PP = ['uma', 'mama'];
 const qualities = ['isa', 'usa', 'ika', 'uka'];
 const statesInanimate = ['pta', 'wopfa', 'pti', 'pla', 'psa', 'ifafka', 'ufafka', 'heku', 'iku', 'itu',
     'utu', 'psi', 'psu'];
-const statesAnimate = ['we', 'ye', 'ifafka', 'ufafka', 'pla', 'ufaro', 'ifaro', 'sule', 'sile', 'sune',
-    'sine', 'sufe', 'sife'];
+const statesAnimate = ['we', 'weka', 'ye', 'yeka', 'ifafka', 'ufafka', 'pla', 'ufaro', 'ifaro', 'sule', 'sile', 
+    'sune', 'sine', 'sufe', 'sife', 'sulo', 'silo', 'sure', 'sire', 'isle', 'usle', 'isne', 'usne', 'isre', 'usre',
+    'isforo', 'usforo', 'ufle', 'ifle', 'ufne', 'ifne', 'ifafe', 'ufafe', 'uflo', 'iflo', 'ufre', 'ifre',
+    'ufaforo', 'ifaforo', 'rokxo', 'rokla'];
 const tools = ['tiro', 'fore', 'tare', 'tiko', 'tixu', 'tuse'];
 const toolsFood = ['tarexo', 'kela', 'kelaxo']
 const weather = ['fafula', 'fapa', 'fula', 'lafu', 'talafu', 'faneufa', 'rafu', 'ufa', 'xefu'];
@@ -659,7 +663,7 @@ function pickThemeWord(wordType, senType = undefined, giveMode = undefined, give
         word = wordType.root[randomRoot][randomArray];
     }
 
-    return word + addAdjective(wordType, 33);
+    return word + addAdjective(wordType, 20);
 }
 
 /*
@@ -682,7 +686,7 @@ function pickSourceWord(wordType, senType) {
         }
     }
 
-    return word + addAdjective(wordType, 33);
+    return word + addAdjective(wordType, 20);
 }
 
 /*
@@ -697,7 +701,7 @@ function pickGoalWord(wordType, senType) {
     let randomArray = Math.floor(Math.random() * maxArray);
     let word = wordType.root[randomRoot][randomArray];
 
-    let adjective = addAdjective(wordType, 33);
+    let adjective = addAdjective(wordType, 20);
 
     if (word[0] === 'k') {
         return 'ya' + word + adjective;
@@ -725,7 +729,7 @@ function pickPossessor(wordType, senType) {
     //console.log('POSESSOR WORD: ' + word);
 
     if (word !== undefined) {
-        return 'a' + word + addAdjective(wordType, 33);
+        return 'a' + word + addAdjective(wordType, 20);
     } else {
         return '';
     }
@@ -750,7 +754,7 @@ function pickLocation(wordType, senType) {
     //console.log('LOCATION WORD: ' + word);
 
     if (word !== undefined) {
-        return 'a' + word + addAdjective(wordType, 33);
+        return 'a' + word + addAdjective(wordType, 20);
     } else {
         return '';
     }
@@ -818,6 +822,23 @@ function checkSameThemeGoal(theme, goal) {
 }
 
 /*
+DOES:       Removes appended adjective from a word (string). Adjectives will always be separated from their host
+            word by a space, so this function looks for a space and truncates the combined word at that index.
+PARAMS:     word (string).
+RETURNS:    string - the original word with adjective removed.
+*/
+function removeAdjective(word) {
+    let newWord;
+    if (word.includes(' ')) {
+        let indexOfSpace = word.indexOf(' ');
+        newWord = word.substring(0, indexOfSpace);
+        return newWord;
+    } else {
+        return word;
+    }
+}
+
+/*
 DOES:       Constructs a sentence by picking a Theme at random (Theme Object), then picking a random but logical
             Source and Goal based on the chosen Theme, with optional Adjectives and Adverbials.
 PARAMS:     sentenceType (string), subordinate (bool)
@@ -851,6 +872,8 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
     goalType = pickGoalType(themeType);
     // Determine Theme word 
     themeNoMode = pickThemeWord(themeType, sentenceType, giveMode, giveTheme);
+    // Remove adjective so theme can be transmitted to subordinate clause more logically
+    themeNoAdjective = removeAdjective(themeNoMode);
     // Add Mode to Theme word
     theme = pickMode(themeType, sentenceType, themeNoMode, giveMode);
     // Determine Source word
@@ -930,7 +953,7 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
         if (conjunction === 'kaxu') {
             if (sentenceType === 'movement') {
                 sentenceTypeSub = 'action';
-                sentenceSub = buildSentence(sentenceTypeSub, true, undefined, themeNoMode, undefined, undefined,
+                sentenceSub = buildSentence(sentenceTypeSub, true, undefined, themeNoAdjective, undefined, undefined,
                     undefined, 'peka', undefined, false);
             } else if (sentenceType === 'action') {
                 sentenceTypeSub = 'possession';
@@ -942,7 +965,7 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
                     undefined, 'peka', themeEmotion, false);
             } else if (sentenceType === 'possession') {
                 sentenceTypeSub = 'movement';
-                sentenceSub = buildSentence(sentenceTypeSub, true, themeNoMode, undefined, undefined, undefined,
+                sentenceSub = buildSentence(sentenceTypeSub, true, themeNoAdjective, undefined, undefined, undefined,
                     undefined, 'peka', undefined, false);
             } else if (sentenceType === 'location') {
                 sentenceTypeSub = 'possession';
