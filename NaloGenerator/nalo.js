@@ -44,12 +44,12 @@ const biomes = ['kifapla', 'kiisa', 'kihela', 'kiheku', 'kihela', 'kihexa', 'kir
     'xaseusa', 'xufula'];
 const colors = ['sularo', 'sulesu', 'sulero', 'surosa', 'sufu', 'suxa', 'surafu', 'sukolesi', 'sukolesu'];
 // PUT THESE INTO ARRAYS BELOW AFTER IMPLEMENTED
-const conjunctionsUnused = ['asupeka', 'paxi', 'kwi', 'kyu']
+const conjunctionsUnused = ['asupeka', 'paxi'];
 // PUT THESE INTO ARRAYS BELOW AFTER IMPLEMENTED
 const conjunctionsBound = ['asupeka'];
 const conjunctionsFreeCause = ['kaxu'];
 const conjunctionsFreeTime = ['ayu', 'awi', 'asu'];
-const conjunctionsSimple = [];
+const conjunctionsSimple = ['kwi', 'kyu'];
 const emotions = ['suna', 'sina', 'isna', 'usna', 'ifna', 'ufna', 'kina', 'usnakaufa', 'sanakapo', 'pepa', 'sana',
     'peksi', 'peksu', 'sanaksi', 'sanaksu', 'peka', 'pepaisna', 'pepausna', 'yoisna', 'nakxo', 'nakla', 'yosna',
     'yousna', 'naksu', 'naksi'];
@@ -123,7 +123,7 @@ let wordActionIntransitive = {
 
 let wordConjunction = {
     name: 'wordConjunction',
-    root: [conjunctionsFreeCause, conjunctionsFreeTime],
+    root: [conjunctionsFreeCause, conjunctionsFreeTime, conjunctionsSimple],
     adjectives: []
 }
 
