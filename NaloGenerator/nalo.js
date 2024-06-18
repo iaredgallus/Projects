@@ -3,7 +3,8 @@
 // TO DO: take out 'a' in Subject Contraction; ex: ofaka > ofka. Q: Under what circumstances? Not straightforward.
 // TO DO: Action types: ActionSpecial (pate mi o[s] ka)
 // TO DO: Create Themes for ActionTypes.
-// TO DO: Address 'or' conjunction (+ peka?) and 'if' conjunction (bound)
+// TO DO: Address 'or' conjunction (+ peka?)
+// TO DO: Address 'if' conjunction (bound)
 // TO DO: Sort out use cases for other conjunctions; which Sources or Themes should carry over based on senType
 
 // DONE: removeAdjective function to send simpler theme into subordinate clauses (2024.06.15)
@@ -899,7 +900,7 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
     }
     // Ensure that Theme and Goal are not identical
         //console.log('SENTENCE: ' + sentenceType + ' | THEME: ' + theme + ' | GOAL: ' + goal);
-    checkSameThemeGoal(theme, goal);
+    checkSameThemeGoal(themeNoMode, goal);
 
     /* === DETERMINE SYNTAX === */
     /* Put Parts in correct order based on sentenceType. */
@@ -943,8 +944,8 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
     } else if (xPercent(30)) {
         /* ===== Subordinate clause optional, 30% chance. UPDATE WHEN DONE TESTING! ===== */
         let conjunction = pickConjunction();
-        //conjunction = 'kaxu';
-        //console.log('CONJUNCTION: ' + conjunction);
+            // conjunction = 'kyu';
+            //console.log('CONJUNCTION: ' + conjunction);
         let sentenceTypeSub;
         let sentenceSub;
 
@@ -979,13 +980,11 @@ function buildSentence(sentenceType, subordinate, giveTheme, giveSource, giveLoc
         } else if (conjunction === 'paxi') {
             sentenceTypeSub = ''
             sentenceSub = buildSentence(sentenceTypeSub, true);
-        } else if (conjunction === 'kwi') {
-            sentenceTypeSub = ''
-            sentenceSub = buildSentence(sentenceTypeSub, true);
-        } else if (conjunction === 'kyu') {
-            sentenceTypeSub = ''
-            sentenceSub = buildSentence(sentenceTypeSub, true);      
-        */     
+        */
+        } else if (conjunction === 'kyu' || conjunction == 'kwi') {
+            sentenceTypeSub = sentenceType;
+            sentenceSub = buildSentence(sentenceTypeSub, true, undefined, undefined, undefined, undefined,
+                undefined, undefined, themeType, true);
         } else if (conjunction === 'awi' || conjunction === 'ayu' || conjunction === 'asu') {
             // Suppress adverbials
             sentenceTypeSub = pickSentenceType();
