@@ -1,9 +1,16 @@
 /* DECLARE VARIABLES */
+const totalTime = 10000;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
 const stars = [];
+const planets = [];
+const numStars = 8000;
+let galaxyColors = [[255,140,0,0.02], [230,85,125,0.04], [0,0,140,0.08]];
 let time = 0;
+let sunRadius = 18;
+let planetColor = [0, 153, 153, 1];
+const timeDelay = 15;
 
 class SkyObject {
     constructor(position, radius, color) {
@@ -20,8 +27,24 @@ class SkyObject {
         return this._radius;
     }
 
+    get r() {
+        return this._color[0];
+    }
+
+    get g() {
+        return this._color[1];
+    }
+
+    get b() {
+        return this._color[2];
+    }
+
+    get a() {
+        return this._color[3];
+    }
+
     get color() {
-        return this._color;
+        return rgbaString(this._color[0], this._color[1], this._color[2], this._color[3]);
     }
 
     get x() {
@@ -53,19 +76,25 @@ class SkyObject {
     }
 }
 
+/* HELPER FUNCTIONS */
 function randomPercentage() {
     return Math.floor(Math.random() * 100);
 }
 
+function rgbaString(r, g, b, a) {
+    return `rgba(${r},${g},${b},${a})`;
+}
+
 /* CREATE SUN */
-let sun = new SkyObject([0, canvas.height / 2], 15, "rgba(255,255,255,1")
+let sun = new SkyObject([0, canvas.height / 2], sunRadius, [255,255,255,1]);
 /* CREATE PLANET */
-let planet = new SkyObject([canvas.width / 2, canvas.height / 2], 60, "rgba(0,0,0,1)");
+let planet = new SkyObject([canvas.width / 2, canvas.height / 2], 60, planetColor);
 /* CREATE STARS */
-for (let i = 0; i < 6000; i++) {
+for (let i = 0; i < numStars; i++) {
     let randomX = Math.floor(Math.random() * canvas.width * 2);
     let randomY;
     let galaxy = false;
+    // Determine density of stars
     if (randomPercentage() < 10) {
         randomY = Math.floor(Math.random() * canvas.height);
     } else if (randomPercentage() < 20) {
@@ -74,52 +103,86 @@ for (let i = 0; i < 6000; i++) {
         randomY = Math.floor(Math.random() * (canvas.height * 0.8 - canvas.height * 0.2 + 1) + canvas.height * 0.2);
     } else if (randomPercentage() < 40) {
         randomY = Math.floor(Math.random() * (canvas.height * 0.7 - canvas.height * 0.3 + 1) + canvas.height * 0.3);
+        // Add galaxy haze to near-middle of the sky, 5% chance
+        if (randomPercentage() < 5) {
+            galaxy = true;
+        }
     } else if (randomPercentage() < 50) {
         randomY = Math.floor(Math.random() * (canvas.height * 0.6 - canvas.height * 0.4 + 1) + canvas.height * 0.4);
+        // Add galaxy haze to near-middle of the sky, 10% chance
+        if (randomPercentage() < 10) {
+            galaxy = true;
+        }
     } else {
         randomY = Math.floor(Math.random() * (canvas.height * 0.55 - canvas.height * 0.45 + 1) + canvas.height * 0.45);
-        if (randomPercentage() < 20) {
+        // Add galaxy haze to middle of the sky, 15% chance
+        if (randomPercentage() < 15) {
             galaxy = true;
         }
     }
 
+    // Select random RGBA values
     let position = [randomX, randomY];
     let randomR = Math.floor(Math.random() * 30 + 225);
     let randomG = Math.floor(Math.random() * 30 + 225);
     let randomB = Math.floor(Math.random() * 30 + 225);
-    let randomA = Math.floor(Math.random() * 11) / 10;
-    let color = `rgba(${randomR},${randomG},${randomB},${randomA})`;
+    let randomA = Math.floor(Math.random() * 8 + 3) / 10;
     let radius;
 
+
+    // Determine size of star objects
     if (i % 60 == 0) {
-        // This is a big star.
+        // Big star, 10% of sky
         radius = 2;
     } else if (galaxy) {
-        // This is galaxy haze.
-        let galaxyColors = ['rgba(255,140,0,0.02)', 'rgba(230,85,125,0.04', 'rgba(0,0,140,0.08'];
+        // Galaxy haze
         let randomIndex = Math.floor(Math.random() * 3);
-        color = galaxyColors[randomIndex];
+        randomR = galaxyColors[randomIndex][0];
+        randomG = galaxyColors[randomIndex][1];
+        randomB = galaxyColors[randomIndex][2];
+        randomA = galaxyColors[randomIndex][3];
         radius = 30;
     } else {
+        // Small star
         radius = 1;
     }
 
-    let skyObject = new SkyObject(position, radius, color);
+    let skyObject = new SkyObject(position, radius, [randomR, randomG, randomB, randomA]);
     stars.push(skyObject);
 }
 console.log('STARS have been created:', stars.length);
-//console.log(stars[0].position, stars[0].radius, stars[0].color);
+
+
 
 function drawSun() {
-    drawCircle(sun.x, sun.y, sun.radius + 64, 'rgba(255, 255, 215, 0.05');
-    drawCircle(sun.x, sun.y, sun.radius + 32, 'rgba(255, 255, 220, 0.05');
-    drawCircle(sun.x, sun.y, sun.radius + 16, 'rgba(255, 255, 225, 0.1');
-    drawCircle(sun.x, sun.y, sun.radius + 8, 'rgba(255, 255, 230, 0.1');
-    drawCircle(sun.x, sun.y, sun.radius + 4, 'rgba(255, 255, 235, 0.2');
-    drawCircle(sun.x, sun.y, sun.radius + 3, 'rgba(255, 255, 240, 0.2');
-    drawCircle(sun.x, sun.y, sun.radius + 2, 'rgba(255, 255, 245, 0.4');
-    drawCircle(sun.x, sun.y, sun.radius + 1, 'rgba(255, 255, 250, 0.8)');
-    drawCircle(sun.x, sun.y, sun.radius, sun.color);
+    let step = 64;
+    let a = 0.001;
+    let newX = sun.x;
+    // If sun is almost at canvas edge, begin rendering aura at negative x-value
+    if (sun.x > 999 - step * 2) {
+        newX = 0 - (999 - sun.x);
+    }
+    for (let i = step; i > 0; i--) {
+        drawCircle(newX, sun.y, sun.radius + (i * 3), rgbaString(255,255,255-i,a));
+        a = a * 1.085;
+    }
+
+    // Enlarge sun slightly at edges of view
+    let firstFifth = canvas.width / 5;
+    let secondFifth = canvas.width * 4 / 5;
+    let fraction = canvas.width / 6;
+    if (newX < firstFifth || newX > secondFifth) {
+        let diff;
+        if (newX < firstFifth) {
+            diff = (firstFifth - newX) / fraction;
+        } else {
+            diff = (newX - secondFifth) / fraction;
+        }
+        drawOvalLeft(newX, sun.y, sun.radius, sun.radius + diff, sun.color);
+        drawOvalRight(newX, sun.y, sun.radius, sun.radius + diff, sun.color);
+    } else {
+        drawCircle(newX, sun.y, sun.radius, sun.color);
+    }
 }
 
 function moveSun() {
@@ -130,24 +193,93 @@ function moveSun() {
     }
 }
 
+function darkenLeft() {
+    ctx.beginPath();
+    ctx.arc(planet.x, planet.y, planet.radius, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.fillStyle = 'black';
+    ctx.fill();
+}
+
+function darkenRight() {
+    ctx.beginPath();
+    ctx.arc(planet.x, planet.y, planet.radius, Math.PI * 1.5, Math.PI * 0.5);
+    ctx.fillStyle = 'black';
+    ctx.fill();
+}
+
+
+/* PROGRAM FUNCTIONS */
 function drawPlanet() {
-    if (Math.abs(planet.x - sun.x) < planet.radius - 40) {
-        drawCircle(planet.x, planet.y, planet.radius + 1, 'rgba(255,255,255,0.05');
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(16,8,0,1');
-    } else if (Math.abs(planet.x - sun.x) < planet.radius - 30) {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(18,9,0,1');
-    } else if (Math.abs(planet.x - sun.x) < planet.radius - 20) {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(20,10,0,1');
-    } else if (Math.abs(planet.x - sun.x) < planet.radius - 10) {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(24,12,0,1');
-    } else if (Math.abs(planet.x - sun.x) < planet.radius - 8) {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(30,15,0,1');
-    } else if (Math.abs(planet.x - sun.x) < planet.radius - 4) {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(31,16,0,1');
-    }else if (sun.x > canvas.width) {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(36,18,0,1');
-    } else {
-        drawCircle(planet.x, planet.y, planet.radius, 'rgba(32,16,0,1');
+    let shadow = rgbaString(0,0,0,0.8);
+    drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
+
+    let path = Math.floor((sun.x * (360 / 1000)));
+    let widthOfLight = Math.floor((planet.radius / 90 * path) % (planet.radius));
+
+    /*
+    let rate1 = 1;
+    // Note: rate2 should always be lower
+    let rate2 = 1;
+    */
+
+    console.log(path, widthOfLight);
+
+    if (path >= 90 && path < 180) {
+        // Left dark, Right waxing
+        drawOvalLeft(planet.x, planet.y, planet.radius, planet.radius, shadow);
+        
+        /*
+        for (let i = 1; i < 90; i++) {
+            if ((planet.radius - light) + (i * rate1) < planet.radius) {
+                drawOvalRight(planet.x, planet.y, (planet.radius - light) + (i * rate2), planet.radius, rgbaString(0,0,0,1/i));
+            }
+        }
+        */
+
+        drawOvalRight(planet.x, planet.y, planet.radius - widthOfLight, planet.radius, shadow);
+
+    } else if (path >= 180 && path < 270) {
+        // Left waxing, Right bright
+        
+        drawOvalLeft(planet.x, planet.y, planet.radius, planet.radius, shadow);
+        
+        /*
+        for (let i = 1; i < 90; i++) {
+            if (planet.radius - (planet.radius - light) + (i * rate1) < planet.radius) {
+                drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - light) + (i * rate2), planet.radius, rgbaString(planet.r, planet.g, planet.b, 1/i));
+            }
+        }
+        */
+
+        drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - widthOfLight), planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
+
+    } else if (path >= 270 && path < 360) {
+        // Left bright, Right waning
+        drawOvalRight(planet.x, planet.y, planet.radius, planet.radius, shadow);
+
+        /*
+        for (let i = 1; i < 90; i++) {
+            if ((planet.radius - light) + (i * rate1) < planet.radius) {
+                drawOvalRight(planet.x, planet.y, (planet.radius - light) + (i * rate2), planet.radius, rgbaString(planet.r, planet.g, planet.b, 1/i));
+            }
+        }
+        */
+
+        drawOvalRight(planet.x, planet.y, planet.radius - widthOfLight, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
+    } else if (path >= 0 && path < 90) {
+        // Left waning, Right dark
+        drawOvalRight(planet.x, planet.y, planet.radius, planet.radius, shadow);
+
+        /*
+        for (let i = 1; i < 90; i++) {
+            if (planet.radius - (planet.radius - light) + (i * rate1) < planet.radius) {
+                //console.log(planet.r, planet.g, planet.b, planet.a);
+                drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - light) + (i * rate2), planet.radius, rgbaString(0,0,0,1/i));
+            }
+        }
+        */
+
+        drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - widthOfLight), planet.radius, shadow);
     }
 }
 
@@ -180,6 +312,20 @@ function drawCircle(x, y, radius, color) {
     ctx.fill();
 }
 
+function drawOvalLeft(x, y, radiusX, radiusY, color) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, radiusX, radiusY, 0, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+function drawOvalRight(x, y, radiusX, radiusY, color) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, radiusX, radiusY, Math.PI, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
 function drawStars() {
     for (s of stars) {
         //console.log('Drawing star at', s.x, s.y, 'with radius', s.radius, 'and color', s.color);
@@ -208,7 +354,7 @@ function setup() {
 
 function main() {
     setup();
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < totalTime; i++) {
         setTimeout(() => {
             timeDisplay.textContent = time;
             clear();
@@ -218,7 +364,8 @@ function main() {
             drawSun();
             drawPlanet();
             time++;
-        }, i * 25);
+            //console.log('Sun position:', sun.x);
+        }, i * timeDelay);
     }
 }
 
