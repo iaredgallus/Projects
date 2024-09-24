@@ -10,7 +10,7 @@ let galaxyColors = [[255,140,0,0.02], [230,85,125,0.04], [0,0,140,0.08]];
 let time = 0;
 let sunRadius = 18;
 let planetColor = [0, 153, 153, 1];
-const timeDelay = 15;
+const timeDelay = 25;
 
 class SkyObject {
     constructor(position, radius, color) {

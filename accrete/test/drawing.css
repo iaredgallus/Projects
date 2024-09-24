@@ -1,0 +1,30 @@
+body, main, canvas {
+    /* border: 1px solid gray; */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+main {
+    max-width: 800px;
+}
+
+section {
+    padding: 1rem 0;
+}
+
+#buttons {
+    display: none;
+}
+
+canvas {
+    visibility: visible;
+    border: 1px solid gray;
+}
