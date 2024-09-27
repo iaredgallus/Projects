@@ -69,19 +69,11 @@ for (let i = 0; i < 1000; i++) {
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, 500, 500);
             addShadow(250, 250, 50, 100, "lightblue");
-            /*
-            addShadow(250, 250, 50, gradientWidth2, "rgba(0,0,0,0.5)");
-            addShadow(250, 250, 50, gradientWidth, "rgba(0,0,0,0.7)");
-            */
             addShadow(250, 250, 50, shadowWidth, "rgba(0,0,0,0.8)", 0.25);
         } else if (i % 360 < 360) {
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, 500, 500);
             addShadow(250, 250, 50, 100, "lightblue");
-            /*
-            removeShadow(250, 250, 50, gradientWidth2, "rgba(0,0,0,0.5)");
-            removeShadow(250, 250, 50, gradientWidth, "rgba(0,0,0,0.7)");
-            */
             removeShadow(250, 250, 50, shadowWidth, "rgba(0,0,0,0.8)", 0.25);
         }
 

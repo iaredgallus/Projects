@@ -1,5 +1,6 @@
 /* DECLARE VARIABLES */
-const totalTime = 10000;
+const totalTime = 1000;
+const timeDelay = 25;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
@@ -9,8 +10,9 @@ const numStars = 8000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.04], [0,0,140,0.08]];
 let time = 0;
 let sunRadius = 18;
-let planetColor = [0, 153, 153, 1];
-const timeDelay = 25;
+let planetRadius = 40;
+let planetColor = [200, 200, 200, 1];
+let path;
 
 class SkyObject {
     constructor(position, radius, color) {
@@ -85,10 +87,9 @@ function rgbaString(r, g, b, a) {
     return `rgba(${r},${g},${b},${a})`;
 }
 
-/* CREATE SUN */
+/* CREATE SUN, PLANET */
 let sun = new SkyObject([0, canvas.height / 2], sunRadius, [255,255,255,1]);
-/* CREATE PLANET */
-let planet = new SkyObject([canvas.width / 2, canvas.height / 2], 60, planetColor);
+let planet = new SkyObject([canvas.width / 2, canvas.height / 2], planetRadius, planetColor);
 /* CREATE STARS */
 for (let i = 0; i < numStars; i++) {
     let randomX = Math.floor(Math.random() * canvas.width * 2);
@@ -129,7 +130,6 @@ for (let i = 0; i < numStars; i++) {
     let randomA = Math.floor(Math.random() * 8 + 3) / 10;
     let radius;
 
-
     // Determine size of star objects
     if (i % 60 == 0) {
         // Big star, 10% of sky
@@ -151,8 +151,6 @@ for (let i = 0; i < numStars; i++) {
     stars.push(skyObject);
 }
 console.log('STARS have been created:', stars.length);
-
-
 
 function drawSun() {
     let step = 64;
@@ -208,78 +206,54 @@ function darkenRight() {
 }
 
 
-/* PROGRAM FUNCTIONS */
 function drawPlanet() {
-    let shadow = rgbaString(0,0,0,0.8);
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
-
-    let path = Math.floor((sun.x * (360 / 1000)));
-    let widthOfLight = Math.floor((planet.radius / 90 * path) % (planet.radius));
+    drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(0,0,255,0.2));
+    
+    let shadowColor = rgbaString(0,0,0,0.9);
+    let zeroToDiameter = Math.floor((planet.radius / 90 * path) % (planet.radius * 2));
+    let countUp = (zeroToDiameter + planet.radius) % (planet.radius * 2);
+    let countDown = (planet.radius * 2) - countUp;
 
     /*
-    let rate1 = 1;
-    // Note: rate2 should always be lower
-    let rate2 = 1;
+    let numberOfGradients = 16;
+    for (let i = -(numberOfGradients / 2); i < numberOfGradients; i++) {
+        let newColor = rgbaString(0,0,0,1/numberOfGradients);
+        let newPath = Math.abs((path + i)) % 360;
+        let newCountUp = Math.abs(countUp + i) % (planet.radius * 2);
+        let newCountDown = Math.abs(countDown + i) % (planet.radius * 2);
+        console.log('newPath',newPath, 'newCountUp:',newCountUp,'newCountDown:',newCountDown);
+
+        //console.log(newCountUp, newCountDown);
+    
+        if (newPath < 90) {
+            // Waning crescent
+            addShadow(planet.x, planet.y, planet.radius, newCountUp, newColor);
+        } else if (newPath < 180) {
+            // Waxing crescent
+            removeShadow(planet.x, planet.y, planet.radius, newCountDown, newColor);
+        } else if (newPath < 270) {
+            // Waxing gibbous
+            removeShadow(planet.x, planet.y, planet.radius, newCountDown, newColor);
+        } else if (newPath < 360) {
+            // Waning gibbous
+            addShadow(planet.x, planet.y, planet.radius, newCountUp, newColor);
+        }    
+    }
     */
 
-    console.log(path, widthOfLight);
-
-    if (path >= 90 && path < 180) {
-        // Left dark, Right waxing
-        drawOvalLeft(planet.x, planet.y, planet.radius, planet.radius, shadow);
-        
-        /*
-        for (let i = 1; i < 90; i++) {
-            if ((planet.radius - light) + (i * rate1) < planet.radius) {
-                drawOvalRight(planet.x, planet.y, (planet.radius - light) + (i * rate2), planet.radius, rgbaString(0,0,0,1/i));
-            }
-        }
-        */
-
-        drawOvalRight(planet.x, planet.y, planet.radius - widthOfLight, planet.radius, shadow);
-
-    } else if (path >= 180 && path < 270) {
-        // Left waxing, Right bright
-        
-        drawOvalLeft(planet.x, planet.y, planet.radius, planet.radius, shadow);
-        
-        /*
-        for (let i = 1; i < 90; i++) {
-            if (planet.radius - (planet.radius - light) + (i * rate1) < planet.radius) {
-                drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - light) + (i * rate2), planet.radius, rgbaString(planet.r, planet.g, planet.b, 1/i));
-            }
-        }
-        */
-
-        drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - widthOfLight), planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
-
-    } else if (path >= 270 && path < 360) {
-        // Left bright, Right waning
-        drawOvalRight(planet.x, planet.y, planet.radius, planet.radius, shadow);
-
-        /*
-        for (let i = 1; i < 90; i++) {
-            if ((planet.radius - light) + (i * rate1) < planet.radius) {
-                drawOvalRight(planet.x, planet.y, (planet.radius - light) + (i * rate2), planet.radius, rgbaString(planet.r, planet.g, planet.b, 1/i));
-            }
-        }
-        */
-
-        drawOvalRight(planet.x, planet.y, planet.radius - widthOfLight, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
-    } else if (path >= 0 && path < 90) {
-        // Left waning, Right dark
-        drawOvalRight(planet.x, planet.y, planet.radius, planet.radius, shadow);
-
-        /*
-        for (let i = 1; i < 90; i++) {
-            if (planet.radius - (planet.radius - light) + (i * rate1) < planet.radius) {
-                //console.log(planet.r, planet.g, planet.b, planet.a);
-                drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - light) + (i * rate2), planet.radius, rgbaString(0,0,0,1/i));
-            }
-        }
-        */
-
-        drawOvalLeft(planet.x, planet.y, planet.radius - (planet.radius - widthOfLight), planet.radius, shadow);
+    if (path < 90) {
+        // Waning crescent (shadow increasing to left)
+        addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
+    } else if (path < 180) {
+        // Waxing crescent (shadow decreasing from right)
+        removeShadow(planet.x, planet.y, planet.radius, countDown, shadowColor);
+    } else if (path < 270) {
+        // Waxing gibbous (shadow decreasing to left)
+        removeShadow(planet.x, planet.y, planet.radius, countDown, shadowColor);
+    } else if (path < 360) {
+        // Waning gibbous (shadow increasing from right)
+        addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
     }
 }
 
@@ -326,15 +300,61 @@ function drawOvalRight(x, y, radiusX, radiusY, color) {
     ctx.fill();
 }
 
+function addShadow(x, y, radius, shadowWidth, color, tilt = 0, newXRadius) {
+    let crescent;
+    let xRadius;
+    if (newXRadius != null) {
+        xRadius = newXRadius;
+    } else {
+        xRadius = radius;
+    }
+    if (shadowWidth < xRadius) {
+        crescent = true;
+        shadowWidth = xRadius - shadowWidth;
+    } else {
+        crescent = false;
+        shadowWidth = shadowWidth - xRadius;
+    }
+
+    ctx.beginPath();
+    ctx.ellipse(x, y, xRadius, radius, tilt, Math.PI*1.5, Math.PI*0.5);
+    ctx.ellipse(x, y, shadowWidth, radius, tilt, Math.PI*0.5, Math.PI*1.5, crescent);
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+function removeShadow(x, y, radius, shadowWidth, color, tilt = 0, newXRadius) {
+    let crescent;
+    let xRadius;
+    if (newXRadius != null) {
+        xRadius = newXRadius;
+    } else {
+        xRadius = radius;
+    }
+    if (shadowWidth < xRadius) {
+        crescent = true;
+        shadowWidth = xRadius - shadowWidth;
+    } else {
+        crescent = false;
+        shadowWidth = shadowWidth - xRadius;
+    }
+
+    ctx.beginPath();
+    ctx.ellipse(x, y, xRadius, radius, tilt, Math.PI*0.5, Math.PI*1.5);
+    ctx.ellipse(x, y, shadowWidth, radius, tilt, Math.PI*1.5, Math.PI*0.5, crescent);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    //console.log('xRadius:', xRadius);
+}
+
 function drawStars() {
     for (s of stars) {
-        //console.log('Drawing star at', s.x, s.y, 'with radius', s.radius, 'and color', s.color);
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
         ctx.fillStyle = s.color;
         ctx.fill();
     }
-    //console.log('STARS have been drawn.');
 }
 
 function moveStars() {
@@ -357,6 +377,8 @@ function main() {
     for (let i = 0; i < totalTime; i++) {
         setTimeout(() => {
             timeDisplay.textContent = time;
+            // PATH divides canvas into 360 degrees based on sun's x-position
+            path = Math.floor((sun.x * (360 / (canvas.width * 2))));
             clear();
             moveStars();
             moveSun();
@@ -364,7 +386,6 @@ function main() {
             drawSun();
             drawPlanet();
             time++;
-            //console.log('Sun position:', sun.x);
         }, i * timeDelay);
     }
 }
