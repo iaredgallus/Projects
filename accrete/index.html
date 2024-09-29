@@ -7,18 +7,32 @@
         <header>
         </header>
         <main>
-            <section id="dashboard">
-                <p>Create your own planet!<br />
-                    Start by picking a size and color.</p>
+            <section id="dashboard" class="panel">
+                <h1>Planet Simulation</h1>
                 <div id="begin">
                     <button id="beginButton" onclick="begin()">Begin</button>
                 </div>
                 <div id="input-container">
-                    Size <input title="1 - 80" id="input-size" type="number" min="1" max="80" value="5" onchange="getUserInput()"/>
-                    Color&nbsp;
-                    R <input title="0 - 255" id="input-color-r" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
-                    G <input title="0 - 255" id="input-color-g" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
-                    B <input title="0 - 255" id="input-color-b" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                    <table>
+                        <colgroup>
+                            <col width="30%"/>
+                            <col />
+                        </colgroup>
+                        <tr>
+                            <td>Size</td>
+                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="5" onchange="getUserInput()"/></td>
+                        </tr>
+                        <tr>
+                            <td>Color (RGB)</td>
+                            <td>
+                                <div id="color-rgb">
+                                    <input title="0 - 255" id="input-color-r" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                                    <input title="0 - 255" id="input-color-g" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                                    <input title="0 - 255" id="input-color-b" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </section>
             <section id="canvas-container">
@@ -27,7 +41,7 @@
             <section id="log">
                 <div id="log-text"></div>
             </section>
-            <section id="stat-display">
+            <section id="stat-display" class="panel">
                 <div id="time-display" class="stat">Time: 0</div>
             </section>
         </main>

@@ -1,5 +1,5 @@
-body, main, canvas {
-    /* border: 1px solid gray; */
+body, input, h1 {
+    font-family: 'Roboto', 'Arial';
 }
 
 body {
@@ -10,7 +10,8 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: 'Roboto', 'Arial';
+    background-color: black;
+    color: rgba(255,255,255,0.95);
 }
 
 main {
@@ -21,36 +22,67 @@ main {
     align-items: bottom;
 }
 
+h1 {
+    margin: 0.75rem;
+    padding: 0;
+}
+
+.panel {
+    background-color: rgba(255,255,255,0.1);
+}
+
 section {
     margin: 0.5rem 0;
+    padding: 0.5rem;
 }
 
 button {
     padding: 0.25rem 0.5rem;
     border-radius: 0.5rem;
     font-size: 1rem;
-    border: 1px solid gray;
-    background-color: white;
+    color: rgba(255,255,255,0.95);
+    background-color: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
     transition: background-color 0.2s ease-in-out;
 }
 
 button:hover {
-    background-color: rgba(255,255,255,0.8);
+    background-color: rgba(255,255,255,0.4);
+}
+
+#begin {
+    margin: 1rem 0;
 }
 
 #dashboard {
-    padding: 0.5rem;
-    background-color: rgba(0,0,0,0.1);
-    color: rgba(0,0,0,0.9);
+    margin-top: 2rem;
+    background-color: rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #input-container {
+    width: 100%;
     margin: 1rem 0;
     display: none;
 }
 
+#input-container table {
+    width: 100%;
+}
+
 input {
-    width: 50px;
+    width: 60px;
+    background-color: rgba(255,255,255,0.6);
+    font-size: 1rem;
+    border: none;
+    padding: 0.25rem;
+}
+
+#color-rgb {
+    display: inline;
 }
 
 #canvas-container {
@@ -60,31 +92,56 @@ input {
 
 canvas {
     visibility: visible;
+    margin: 2rem 0;
 }
 
 #log {
     padding: 1rem 0;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.2);
     height: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    display: none;
 }
 
 #stat-display {
-    padding: 0.5rem;
-    background-color: rgba(0,0,0,0.1);
-    color: rgba(0,0,0,0.9);
+    display: none;
 }
 
 
-
 @media screen and (max-width:500px) {
-    canvas {
-        width: 100%;
+
+    button {
+        background-color: rgba(255,255,255,0.2);
     }
 
     main {
         width: 100%;
+    }
+
+    section {
+        padding: 0.25rem 1rem;
+    }
+
+    #canvas-container {
+        padding: 0;
+    }
+
+    canvas {
+        width: 100%;
+    }
+
+    #dashboard {
+        margin-top: 0;
+    }
+
+    #log {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    #stat-display {
+        background-color: transparent;
     }
 }

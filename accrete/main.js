@@ -1,6 +1,6 @@
 /* DECLARE VARIABLES */
 const totalTime = 10000;
-const timeDelay = 25;
+const timeDelay = 30;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
@@ -20,6 +20,7 @@ let inputColorG = parseInt(document.querySelector('#input-color-g').value);
 let inputColorB = parseInt(document.querySelector('#input-color-b').value);
 let lastMessage;
 
+/* DEFINE SKYOBJECT CLASS: sun, stars, planets */
 class SkyObject {
     constructor(position, radius, color) {
         this._position = position;
@@ -197,33 +198,33 @@ function getUserInput() {
     console.log('INPUTS = Size:',inputSize,'R:',inputColorR,'G:',inputColorG,'B:',inputColorB);
     if (inputColorR >= 0 && inputColorR <= 255 && inputColorR != null) {
         if (inputColorR > planet.r) {
-            log.textContent = "You've made the planet more red.";
+            log.textContent = "Planet color: red increased.";
         } else if (inputColorR < planet.r) {
-            log.textContent = "You've made the planet less red.";
+            log.textContent = "Planet color: red decreased.";
         }
         planet.r = inputColorR;
     }
     if (inputColorG >= 0 && inputColorG <= 255 && inputColorG != null) {
         if (inputColorG > planet.g) {
-            log.textContent = "You've made the planet more green.";
+            log.textContent = "Planet color: green increased.";
         } else if (inputColorG < planet.g) {
-            log.textContent = "You've made the planet less green.";
+            log.textContent = "Planet color: green decreased.";
         }
         planet.g = inputColorG;
     }
     if (inputColorB >= 0 && inputColorB <= 255 && inputColorB != null) {
         if (inputColorB > planet.b) {
-            log.textContent = "You've made the planet more blue.";
+            log.textContent = "Planet color: blue increased.";
         } else if (inputColorB < planet.b) {
-            log.textContent = "You've made the planet less blue.";
+            log.textContent = "Planet color: blue decreased.";
         }
         planet.b = inputColorB;
     }
     if (inputSize >= 1 && inputSize <= 80 && inputSize != null) {
         if (inputSize > planet.radius) {
-            log.textContent = "You've increased the planet's size.";
+            log.textContent = "Planet size increased.";
         } else if (inputSize < planet.radius) {
-            log.textContent = "You've decreased the planet's size.";
+            log.textContent = "Planet size decreased.";
         }
         planet.radius = inputSize;
     }
@@ -456,13 +457,21 @@ function setup() {
 
 let pause = false;
 
+/* Sends a new message to the log; updates time of "lastMessage". */
+function newMessage(string) {
+    log.textContent = string;
+    lastMessage = Date.now();
+}
+
+/* Toggles between pause and unpause; prints message to the log. */
 function pauseUnpause() {
     if (pause == false) {
         pause = true;
+        newMessage("Simulation paused.");
     } else {
         pause = false;
+        newMessage("Simulation resumed.");
     }
-    //console.log(pause);
 }
 
 function displayPaused() {
@@ -475,10 +484,18 @@ function displayPaused() {
 
 /* Clears log after last message has been active for 5 seconds. */
 function tryClearLog() {
-    let now = Date.now()
+    let now = Date.now();
     if (now - lastMessage >= 5000) {
         log.textContent = "";
     }
+}
+
+/* Hides the "Begin" button and displays the in-game log and stat panel. */
+function showPanels() {
+    document.querySelector('#begin').style.display = "none";
+    document.querySelector('#input-container').style.display = "block";
+    document.querySelector('#log').style.display = "flex";
+    document.querySelector('#stat-display').style.display = "block";
 }
 
 function main() {
@@ -522,6 +539,5 @@ function main() {
 
 function begin() {
     main();
-    document.querySelector('#begin').style.display = "none";
-    document.querySelector('#input-container').style.display = "block";
+    showPanels();
 }
