@@ -8,16 +8,28 @@
         </header>
         <main>
             <section id="dashboard">
-                <p>This is an introduction to the game.</p>
-                <button id="begin" onclick="showCanvas()">Begin</button>
-                <div id="buttons">
-                    <button>Test Button</button>
+                <p>Create your own planet!<br />
+                    Start by picking a size and color.</p>
+                <div id="begin">
+                    <button id="beginButton" onclick="begin()">Begin</button>
+                </div>
+                <div id="input-container">
+                    Size <input title="1 - 80" id="input-size" type="number" min="1" max="80" value="5" onchange="getUserInput()"/>
+                    Color&nbsp;
+                    R <input title="0 - 255" id="input-color-r" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                    G <input title="0 - 255" id="input-color-g" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                    B <input title="0 - 255" id="input-color-b" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
                 </div>
             </section>
-            <canvas id="canvas" height="500" width="500"></canvas>
-            <div>
-                <div id="time-display"></div>
-            </div>
+            <section id="canvas-container">
+                <canvas id="canvas" height="500" width="500" onclick="pauseUnpause()"></canvas>
+            </section>
+            <section id="log">
+                <div id="log-text"></div>
+            </section>
+            <section id="stat-display">
+                <div id="time-display" class="stat">Time: 0</div>
+            </section>
         </main>
         <footer></footer>
         <script src="./main.js"></script>

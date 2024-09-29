@@ -1,18 +1,24 @@
 /* DECLARE VARIABLES */
-const totalTime = 1000;
+const totalTime = 10000;
 const timeDelay = 25;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
+let log = document.querySelector('#log-text');
 const stars = [];
 const planets = [];
 const numStars = 8000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.04], [0,0,140,0.08]];
 let time = 0;
 let sunRadius = 18;
-let planetRadius = 40;
-let planetColor = [200, 200, 200, 1];
+let planetRadius = 0; // DEFAULT = 0
+let planetColor = [0, 0, 0, 1]; // DEFAULT = black
 let path;
+let inputSize = parseInt(document.querySelector('#input-size').value);
+let inputColorR = parseInt(document.querySelector('#input-color-r').value);
+let inputColorG = parseInt(document.querySelector('#input-color-g').value);
+let inputColorB = parseInt(document.querySelector('#input-color-b').value);
+let lastMessage;
 
 class SkyObject {
     constructor(position, radius, color) {
@@ -76,6 +82,22 @@ class SkyObject {
     set color(rgbaString) {
         this._color = rgbaString;
     }
+
+    set r(value) {
+        this._color[0] = value;
+    }
+
+    set g(value) {
+        this._color[1] = value;
+    }
+
+    set b(value) {
+        this._color[2] = value;
+    }
+
+    set a(value) {
+        return this._color[3] = value;
+    }
 }
 
 /* HELPER FUNCTIONS */
@@ -89,7 +111,21 @@ function rgbaString(r, g, b, a) {
 
 /* CREATE SUN, PLANET */
 let sun = new SkyObject([0, canvas.height / 2], sunRadius, [255,255,255,1]);
+
+/* CREATE PLANET */
 let planet = new SkyObject([canvas.width / 2, canvas.height / 2], planetRadius, planetColor);
+// Pull any default values from the HTML inputs if they exist.
+if (inputColorR != null && inputColorG != null && inputColorB != null) {
+    planetColor
+    planet.r = inputColorR;
+    planet.g = inputColorG;
+    planet.b = inputColorB;
+    planet.a = 1;
+}
+if (inputSize != null) {
+    planet.radius = inputSize;
+}
+
 /* CREATE STARS */
 for (let i = 0; i < numStars; i++) {
     let randomX = Math.floor(Math.random() * canvas.width * 2);
@@ -152,6 +188,50 @@ for (let i = 0; i < numStars; i++) {
 }
 console.log('STARS have been created:', stars.length);
 
+/* GET USER INPUT */
+function getUserInput() {
+    inputSize = parseInt(document.querySelector('#input-size').value);
+    inputColorR = parseInt(document.querySelector('#input-color-r').value);
+    inputColorG = parseInt(document.querySelector('#input-color-g').value);
+    inputColorB = parseInt(document.querySelector('#input-color-b').value);
+    console.log('INPUTS = Size:',inputSize,'R:',inputColorR,'G:',inputColorG,'B:',inputColorB);
+    if (inputColorR >= 0 && inputColorR <= 255 && inputColorR != null) {
+        if (inputColorR > planet.r) {
+            log.textContent = "You've made the planet more red.";
+        } else if (inputColorR < planet.r) {
+            log.textContent = "You've made the planet less red.";
+        }
+        planet.r = inputColorR;
+    }
+    if (inputColorG >= 0 && inputColorG <= 255 && inputColorG != null) {
+        if (inputColorG > planet.g) {
+            log.textContent = "You've made the planet more green.";
+        } else if (inputColorG < planet.g) {
+            log.textContent = "You've made the planet less green.";
+        }
+        planet.g = inputColorG;
+    }
+    if (inputColorB >= 0 && inputColorB <= 255 && inputColorB != null) {
+        if (inputColorB > planet.b) {
+            log.textContent = "You've made the planet more blue.";
+        } else if (inputColorB < planet.b) {
+            log.textContent = "You've made the planet less blue.";
+        }
+        planet.b = inputColorB;
+    }
+    if (inputSize >= 1 && inputSize <= 80 && inputSize != null) {
+        if (inputSize > planet.radius) {
+            log.textContent = "You've increased the planet's size.";
+        } else if (inputSize < planet.radius) {
+            log.textContent = "You've decreased the planet's size.";
+        }
+        planet.radius = inputSize;
+    }
+    lastMessage = Date.now();
+    //console.log(lastMessage);
+    //console.log('Size:',planet.radius,'R:',planet.r,'G:',planet.g,'B:',planet.b);
+}
+
 function drawSun() {
     let step = 64;
     let a = 0.001;
@@ -207,13 +287,29 @@ function darkenRight() {
 
 
 function drawPlanet() {
+    //console.log('Planet Radius',planet.radius,'RGB',planet.r, planet.g, planet.b);
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
-    drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(0,0,255,0.2));
+    //drawCircle(planet.x, planet.y, (planet.radius + 1), rgbaString(0,0,255,0.5));
     
     let shadowColor = rgbaString(0,0,0,0.9);
     let zeroToDiameter = Math.floor((planet.radius / 90 * path) % (planet.radius * 2));
     let countUp = (zeroToDiameter + planet.radius) % (planet.radius * 2);
     let countDown = (planet.radius * 2) - countUp;
+    //console.log(path, zeroToDiameter, countUp, countDown);
+
+    if (path < 90) {
+        // Waning crescent (shadow increasing to left)
+        addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
+    } else if (path < 180) {
+        // Waxing crescent (shadow decreasing from right)
+        removeShadow(planet.x, planet.y, planet.radius, countDown, shadowColor);
+    } else if (path < 270) {
+        // Waxing gibbous (shadow decreasing to left)
+        removeShadow(planet.x, planet.y, planet.radius, countDown, shadowColor);
+    } else if (path < 360) {
+        // Waning gibbous (shadow increasing from right)
+        addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
+    }
 
     /*
     let numberOfGradients = 16;
@@ -241,20 +337,6 @@ function drawPlanet() {
         }    
     }
     */
-
-    if (path < 90) {
-        // Waning crescent (shadow increasing to left)
-        addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
-    } else if (path < 180) {
-        // Waxing crescent (shadow decreasing from right)
-        removeShadow(planet.x, planet.y, planet.radius, countDown, shadowColor);
-    } else if (path < 270) {
-        // Waxing gibbous (shadow decreasing to left)
-        removeShadow(planet.x, planet.y, planet.radius, countDown, shadowColor);
-    } else if (path < 360) {
-        // Waning gibbous (shadow increasing from right)
-        addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
-    }
 }
 
 /* BUTTON FUNCTIONS */
@@ -372,22 +454,74 @@ function setup() {
     drawStars();
 }
 
-function main() {
-    setup();
-    for (let i = 0; i < totalTime; i++) {
-        setTimeout(() => {
-            timeDisplay.textContent = time;
-            // PATH divides canvas into 360 degrees based on sun's x-position
-            path = Math.floor((sun.x * (360 / (canvas.width * 2))));
-            clear();
-            moveStars();
-            moveSun();
-            drawStars();
-            drawSun();
-            drawPlanet();
-            time++;
-        }, i * timeDelay);
+let pause = false;
+
+function pauseUnpause() {
+    if (pause == false) {
+        pause = true;
+    } else {
+        pause = false;
+    }
+    //console.log(pause);
+}
+
+function displayPaused() {
+    let fontSize = 7;
+    drawCircle(canvas.width / 2, canvas.height / 2, 21, rgbaString(255,255,255,0.5));
+    ctx.fillStyle = rgbaString(0,0,0,0.85);
+    ctx.fillRect(canvas.width / 2 - fontSize * 1.5, canvas.height / 2 - fontSize * 1.35, fontSize, fontSize * 2.85);
+    ctx.fillRect(canvas.width / 2 - fontSize * 1.5 + fontSize * 2, canvas.height / 2 - fontSize * 1.35, fontSize, fontSize * 2.85);
+}
+
+/* Clears log after last message has been active for 5 seconds. */
+function tryClearLog() {
+    let now = Date.now()
+    if (now - lastMessage >= 5000) {
+        log.textContent = "";
     }
 }
 
-main();
+function main() {
+    setup();
+
+    // Until the simulation has been running for totalTime...
+    for (let i = 0; i < totalTime; i++) {
+
+        // Do this repeatedly: after n seconds (timeDelay), increment object positions + re-draw
+        setTimeout(() => {
+
+            if (pause === false) {
+            // If not paused...
+                timeDisplay.textContent = 'Time: ' + time; // Show new time
+                path = Math.floor(
+                    (sun.x * (360 / (canvas.width * 2)))); // Path divides sun's movement into 360 degrees
+                clear(); // Clear canvas
+                moveStars(); // Move stars to new position
+                moveSun(); // Move sun to new position
+                drawStars(); // Draw stars in new position
+                drawSun(); // Draw sun in new position
+                drawPlanet(); // Draw planet with new 
+                time++; // Increment time
+            } else {
+            // If paused...
+                // Draw sun, stars, and planet in last position before pause
+                clear();
+                drawStars();
+                drawSun();
+                drawPlanet();
+                displayPaused(); // And, draw pause icon
+            }
+
+            tryClearLog(); // Check duration of last message; clear after some # of seconds
+
+        }, i * timeDelay);
+
+    }
+
+}
+
+function begin() {
+    main();
+    document.querySelector('#begin').style.display = "none";
+    document.querySelector('#input-container').style.display = "block";
+}
