@@ -19,11 +19,11 @@
                             <col />
                         </colgroup>
                         <tr>
-                            <td>Size</td>
-                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="5" onchange="getUserInput()"/></td>
+                            <td width>Size</td>
+                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="1" onchange="getUserInput()"/></td>
                         </tr>
                         <tr>
-                            <td>Color (RGB)</td>
+                            <td width>Color (RGB)</td>
                             <td>
                                 <div id="color-rgb">
                                     <input title="0 - 255" id="input-color-r" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
@@ -33,6 +33,12 @@
                             </td>
                         </tr>
                     </table>
+                    <!--
+                    <div id="speed-row">
+                        <button onclick="faster();">Speed Up</button>
+                        <button onclick="slower();">Slow Down</button>
+                    </div>
+                    -->
                 </div>
             </section>
             <section id="canvas-container">
@@ -42,7 +48,7 @@
                 <div id="log-text"></div>
             </section>
             <section id="stat-display" class="panel">
-                <div id="time-display" class="stat">Time: 0</div>
+                <div id="time-display" class="stat">Year: 0</div>
             </section>
         </main>
         <footer></footer>

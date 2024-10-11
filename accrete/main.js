@@ -1,6 +1,5 @@
 /* DECLARE VARIABLES */
-const totalTime = 10000;
-const timeDelay = 30;
+let timeDelay = 25;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
@@ -8,7 +7,7 @@ let log = document.querySelector('#log-text');
 const stars = [];
 const planets = [];
 const numStars = 8000;
-let galaxyColors = [[255,140,0,0.02], [230,85,125,0.04], [0,0,140,0.08]];
+let galaxyColors = [[255,140,0,0.02], [230,85,125,0.03], [0,0,140,0.06], [0,0,140,0.06], [0,0,140,0.06]];
 let time = 0;
 let sunRadius = 18;
 let planetRadius = 0; // DEFAULT = 0
@@ -19,6 +18,7 @@ let inputColorR = parseInt(document.querySelector('#input-color-r').value);
 let inputColorG = parseInt(document.querySelector('#input-color-g').value);
 let inputColorB = parseInt(document.querySelector('#input-color-b').value);
 let lastMessage;
+let pause = false;
 
 /* DEFINE SKYOBJECT CLASS: sun, stars, planets */
 class SkyObject {
@@ -154,7 +154,7 @@ for (let i = 0; i < numStars; i++) {
     } else {
         randomY = Math.floor(Math.random() * (canvas.height * 0.55 - canvas.height * 0.45 + 1) + canvas.height * 0.45);
         // Add galaxy haze to middle of the sky, 15% chance
-        if (randomPercentage() < 15) {
+        if (randomPercentage() < 6) {
             galaxy = true;
         }
     }
@@ -164,24 +164,25 @@ for (let i = 0; i < numStars; i++) {
     let randomR = Math.floor(Math.random() * 30 + 225);
     let randomG = Math.floor(Math.random() * 30 + 225);
     let randomB = Math.floor(Math.random() * 30 + 225);
-    let randomA = Math.floor(Math.random() * 8 + 3) / 10;
+    let randomA = Math.random() + 0.85;
+    if (randomA > 1) {randomA = 1};
     let radius;
 
     // Determine size of star objects
     if (i % 60 == 0) {
         // Big star, 10% of sky
-        radius = 2;
+        radius = 1;
     } else if (galaxy) {
         // Galaxy haze
-        let randomIndex = Math.floor(Math.random() * 3);
+        let randomIndex = Math.floor(Math.random() * 4);
         randomR = galaxyColors[randomIndex][0];
         randomG = galaxyColors[randomIndex][1];
         randomB = galaxyColors[randomIndex][2];
         randomA = galaxyColors[randomIndex][3];
-        radius = 30;
+        radius = 35;
     } else {
         // Small star
-        radius = 1;
+        radius = 0.5;
     }
 
     let skyObject = new SkyObject(position, radius, [randomR, randomG, randomB, randomA]);
@@ -442,7 +443,7 @@ function drawStars() {
 
 function moveStars() {
     for (s of stars) {
-        if (s.x === 999) {
+        if (s.x === canvas.width * 2 - 1) {
             s.x = 0;
         } else {
             s.x++;
@@ -454,8 +455,6 @@ function setup() {
     clear();
     drawStars();
 }
-
-let pause = false;
 
 /* Sends a new message to the log; updates time of "lastMessage". */
 function newMessage(string) {
@@ -498,43 +497,67 @@ function showPanels() {
     document.querySelector('#stat-display').style.display = "block";
 }
 
+function calculatePath360() {
+    return Math.floor((sun.x * (360 / (canvas.width * 2)))); // Path divides sun's path into 360 degrees
+}
+
+function faster() {
+    if (timeDelay > 5) {
+        timeDelay -= 5;
+    }
+    console.log(timeDelay);
+}
+
+function slower() {
+    if (timeDelay < 60) {
+        timeDelay += 5;
+    }
+    console.log(timeDelay);
+}
+
+function showNewTime() {
+    let year = time;
+    let formattedYear;
+    if (time < 1000000) {
+        year = (time).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        formattedYear = `Year: ${year}`;
+    } else if (time < 1000000000) {
+        year = (time / 1000000).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        formattedYear = `Year: ${year} Million`;
+    } else {
+        year = (time / 1000000000).toLocaleString('en-US', {minimumFractionDigits: 4, maximumFractionDigits: 4});
+        formattedYear = `Year: ${year} Billion`;
+    }
+    timeDisplay.textContent = formattedYear;
+}
+
+function drawFrame() {
+    if (pause === false) {
+    // If not paused...
+        showNewTime();
+        path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
+        clear(); // Clear canvas from last drawing
+        moveStars(); // Move stars to new position
+        moveSun(); // Move sun to new position
+        drawStars(); // Draw stars in new position
+        drawSun(); // Draw sun in new position
+        drawPlanet(); // Draw planet with new 
+        time = time + (timeDelay * 100); // Increment time
+    } else {
+    // If paused...
+        // Draw sun, stars, and planet in last position before pause
+        clear();
+        drawStars();
+        drawSun();
+        drawPlanet();
+        displayPaused(); // And, draw pause icon
+    }
+    tryClearLog(); // Check duration of last message; clear after some # of seconds
+}
+
 function main() {
     setup();
-
-    // Until the simulation has been running for totalTime...
-    for (let i = 0; i < totalTime; i++) {
-
-        // Do this repeatedly: after n seconds (timeDelay), increment object positions + re-draw
-        setTimeout(() => {
-
-            if (pause === false) {
-            // If not paused...
-                timeDisplay.textContent = 'Time: ' + time; // Show new time
-                path = Math.floor(
-                    (sun.x * (360 / (canvas.width * 2)))); // Path divides sun's movement into 360 degrees
-                clear(); // Clear canvas
-                moveStars(); // Move stars to new position
-                moveSun(); // Move sun to new position
-                drawStars(); // Draw stars in new position
-                drawSun(); // Draw sun in new position
-                drawPlanet(); // Draw planet with new 
-                time++; // Increment time
-            } else {
-            // If paused...
-                // Draw sun, stars, and planet in last position before pause
-                clear();
-                drawStars();
-                drawSun();
-                drawPlanet();
-                displayPaused(); // And, draw pause icon
-            }
-
-            tryClearLog(); // Check duration of last message; clear after some # of seconds
-
-        }, i * timeDelay);
-
-    }
-
+    setInterval(drawFrame, timeDelay);
 }
 
 function begin() {
