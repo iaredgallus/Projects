@@ -4,6 +4,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
 let log = document.querySelector('#log-text');
+let bombardButton = document.querySelector('#bombard');
 const stars = [];
 const planets = [];
 const numStars = 8000;
@@ -531,6 +532,78 @@ function showNewTime() {
     timeDisplay.textContent = formattedYear;
 }
 
+let impactObjects = [];
+let incoming = false;
+let velocity;
+let impactLevel = 0;
+
+function bombard() {
+    incoming = true;
+    bombardButton.style.visibility = "hidden";
+    createImpactObject();
+}
+
+function createImpactObject() {
+    let impactObjectSize = Math.floor(Math.random() * 9) + 1;
+    console.log(impactObjectSize);
+    impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [200,200,200,1]));
+    velocity = Math.floor(Math.random() * 3) + 3;
+    if (randomPercentage(50) < 50) {
+        velocity = 0 - velocity;
+        impactObjects[0].x = canvas.width;
+    }
+    //console.log('Velocity: ', velocity);
+}
+
+function drawImpactObject() {
+    let impactObject = impactObjects[0];
+    drawCircle(impactObject.x, impactObject.y, impactObject.radius, impactObject.color);
+}
+
+function moveImpactObject() {
+    let impactObject = impactObjects[0];
+    impactObject.x += velocity;
+    //console.log(impactObject.x);
+
+    if (velocity > 0 && impactObject.x + impactObject.radius >= planet.x - planet.radius) {
+        impactLevel++;
+        //console.log('Impact Level: ', impactLevel);
+    } else if (velocity < 0 && impactObject.x - impactObject.radius <= planet.x + planet.radius) {
+        impactLevel++;
+        //console.log('Impact Level: ', impactLevel);
+    }
+
+    if (impactLevel == 1) {
+        drawCircle(impactObject.x - velocity, impactObject.y, impactObject.radius * 2, rgbaString(255,150,0,0.75));
+        impactObject.a = 0.25;
+    } else if (impactLevel == 2) {
+        drawCircle(impactObject.x - velocity * 3, impactObject.y, impactObject.radius * 4, rgbaString(255,200,100,0.25));
+        impactObject.a = 0.125;
+    } else if (impactLevel == 3) {
+        drawCircle(impactObject.x - velocity * 5, impactObject.y, impactObject.radius * 6, rgbaString(255,255,200,0.125));
+        impactObject.a = 0.0675;
+    } else if (impactLevel == 4) {
+        drawCircle(impactObject.x - velocity * 6, impactObject.y, impactObject.radius * 8, rgbaString(255,255,255,0.0675));
+        impactObject.a = 0.3875;
+        //if (impactObject.radius > 1) {impactObject.radius = impactObject.radius - 1;}
+    }
+    
+    if (velocity > 0 && impactObject.x - impactObject.radius >= planet.x - planet.radius) {
+        destroyImpactObject();
+        bombardButton.style.visibility = "visible";
+        impactLevel = 0;
+    } else if (velocity < 0 && impactObject.x + impactObject.radius <= planet.x + planet.radius) {
+        destroyImpactObject();
+        bombardButton.style.visibility = "visible";
+        impactLevel = 0;
+    }
+}
+
+function destroyImpactObject() {
+    incoming = false;
+    impactObjects.pop();
+}
+
 function drawFrame() {
     if (pause === false) {
     // If not paused...
@@ -541,7 +614,11 @@ function drawFrame() {
         moveSun(); // Move sun to new position
         drawStars(); // Draw stars in new position
         drawSun(); // Draw sun in new position
-        drawPlanet(); // Draw planet with new 
+        if (incoming) {
+            drawImpactObject();
+            moveImpactObject();
+        }
+        drawPlanet(); // Draw planet with new
         time = time + (timeDelay * 100); // Increment time
     } else {
     // If paused...
