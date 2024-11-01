@@ -9,8 +9,8 @@ const stars = [];
 const planets = [];
 const numStars = 8000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.03], [0,0,140,0.06], [0,0,140,0.06], [0,0,140,0.06]];
-let time = 0;
-let sunRadius = 18;
+let time = 9400000000;
+let sunRadius = 16;
 let planetRadius = 0; // DEFAULT = 0
 let planetColor = [0, 0, 0, 1]; // DEFAULT = black
 let path;
@@ -235,16 +235,62 @@ function getUserInput() {
     //console.log('Size:',planet.radius,'R:',planet.r,'G:',planet.g,'B:',planet.b);
 }
 
+function changeSunColor() {
+    let relativeTime;
+    if (time > 9500000000) {
+        relativeTime = time - 9500000000;
+        let stepB = Math.floor(relativeTime / 300000);
+        let stepG = Math.floor(stepB / 2);
+        sun.g = 255 - stepG;
+        sun.b = 255 - stepB;
+    }
+}
+
+function checkSunSize() {
+    let ratio;
+    if (time < 9500000000) {
+        ratio = 1 + (time / 10000000000 / 2); // Div by 2, div by 2 (for radius);
+    } else {
+        let relativeTime = time - 9500000000;
+        //console.log(relativeTime);
+        ratio = relativeTime / 10000000;
+        if (ratio < 1.5) {
+            ratio = 1.5;
+        }
+    }
+    //console.log(ratio);
+    return ratio;
+}
+
+function checkSunLuminosity() {
+    let ratio = 1 + (time / 100000000000);
+    //console.log(ratio);
+    return ratio;
+}
+
+function redGiantHaze() {
+    if (time > 9500000000) {
+        let relativeTime = time - 9500000000;
+        let ratio = relativeTime / 750000000;
+        //console.log(ratio);
+        return ratio;
+    }
+}
+
 function drawSun() {
-    let step = 64;
+    let step = Math.floor(62 * checkSunLuminosity());
+    sun.radius = Math.floor(sunRadius * checkSunSize());
+    let size = sun.radius;
+    changeSunColor();
+    //console.log(size, step);
     let a = 0.001;
     let newX = sun.x;
     // If sun is almost at canvas edge, begin rendering aura at negative x-value
-    if (sun.x > 999 - step * 2) {
+    if (sun.x > 999 - step * 3) {
         newX = 0 - (999 - sun.x);
     }
     for (let i = step; i > 0; i--) {
-        drawCircle(newX, sun.y, sun.radius + (i * 3), rgbaString(255,255,255-i,a));
+        drawCircle(newX, sun.y, size + (i * 3), rgbaString(sun.r-i,sun.g-i,sun.b-i,a));
         a = a * 1.085;
     }
 
@@ -259,10 +305,10 @@ function drawSun() {
         } else {
             diff = (newX - secondFifth) / fraction;
         }
-        drawOvalLeft(newX, sun.y, sun.radius, sun.radius + diff, sun.color);
-        drawOvalRight(newX, sun.y, sun.radius, sun.radius + diff, sun.color);
+        drawOvalLeft(newX, sun.y, size, size + diff, sun.color);
+        drawOvalRight(newX, sun.y, size, size + diff, sun.color);
     } else {
-        drawCircle(newX, sun.y, sun.radius, sun.color);
+        drawCircle(newX, sun.y, size, sun.color);
     }
 }
 
@@ -312,6 +358,12 @@ function drawPlanet() {
     } else if (path < 360) {
         // Waning gibbous (shadow increasing from right)
         addShadow(planet.x, planet.y, planet.radius, countUp, shadowColor);
+    }
+
+    if (time > 9500000000) {
+        // Add red haze over planet
+        let hazeOpacity = redGiantHaze();
+        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(sun.r, sun.g, sun.b, hazeOpacity));
     }
 
     /*
@@ -610,8 +662,10 @@ function drawFrame() {
         showNewTime();
         path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
         clear(); // Clear canvas from last drawing
-        moveStars(); // Move stars to new position
-        moveSun(); // Move sun to new position
+        if (time < 9500000000) {
+            moveStars(); // Move stars to new position
+            moveSun(); // Move sun to new position
+        }
         drawStars(); // Draw stars in new position
         drawSun(); // Draw sun in new position
         if (incoming) {
@@ -619,7 +673,7 @@ function drawFrame() {
             moveImpactObject();
         }
         drawPlanet(); // Draw planet with new
-        time = time + (timeDelay * 100); // Increment time
+        time = time + (timeDelay * 10000); // Increment time
     } else {
     // If paused...
         // Draw sun, stars, and planet in last position before pause
@@ -630,6 +684,14 @@ function drawFrame() {
         displayPaused(); // And, draw pause icon
     }
     tryClearLog(); // Check duration of last message; clear after some # of seconds
+
+    // End simulation
+    if (time >= 9500000000) {
+        if (sun.x != canvas.width / 2) {
+            moveStars();
+            moveSun();
+        }
+    }
 }
 
 function main() {
