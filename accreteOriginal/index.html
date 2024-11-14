@@ -13,14 +13,14 @@
                     <button id="beginButton" onclick="begin()">Begin</button>
                 </div>
                 <div id="input-container">
-                    <table id="input-table">
+                    <table>
                         <colgroup>
                             <col width="30%"/>
                             <col />
                         </colgroup>
                         <tr>
                             <td width>Size</td>
-                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="20" onchange="getUserInput()"/></td>
+                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="40" onchange="getUserInput()"/></td>
                         </tr>
                         <tr>
                             <td width>Color (RGB)</td>
@@ -33,9 +33,14 @@
                             </td>
                         </tr>
                     </table>
+                    <!--
+                    <div id="speed-row">
+                        <button onclick="faster();">Speed Up</button>
+                        <button onclick="slower();">Slow Down</button>
+                    </div>
+                    -->
                     <div>
-                        <button class="bombard" onclick="bombard(1)">Bombard x1</button>
-                        <button class="bombard" onclick="bombard(10)">Bombard x10</button>
+                        <button id="bombard" onclick="bombard()">Bombard</button>
                     </div>
                 </div>
             </section>
