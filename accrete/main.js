@@ -3,13 +3,15 @@ let timeDelay = 25;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
+const volumeDisplay = document.getElementById('volume-display');
 let log = document.querySelector('#log-text');
 let bombardButtons = document.getElementsByClassName('bombard');
+let forwardButtons = document.getElementsByClassName('forward');
 const stars = [];
 const planets = [];
 const numStars = 8000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.03], [0,0,140,0.06], [0,0,140,0.06], [0,0,140,0.06]];
-let time = 9450000000;
+let time = 4500000000;
 let sunRadius = 16;
 let planetRadius = 0; // DEFAULT = 0
 let planetColor = [0, 0, 0, 1]; // DEFAULT = black
@@ -20,6 +22,8 @@ let inputColorG = parseInt(document.querySelector('#input-color-g').value);
 let inputColorB = parseInt(document.querySelector('#input-color-b').value);
 let lastMessage;
 let pause = false;
+let sunStart;
+let timeIncrement;
 
 /* DEFINE SKYOBJECT CLASS: sun, stars, planets */
 class SkyObject {
@@ -323,11 +327,11 @@ function drawSun() {
     }
 }
 
-function moveSun() {
-    if (sun.x == 999) {
+function moveSun(integer) {
+    if (sun.x >= (canvas.width * 2) - 1) {
         sun.x = 0;
     } else {
-        sun.x++;
+        sun.x = sun.x + integer;
     }
 }
 
@@ -368,15 +372,12 @@ function shadow(object) {
 
 
 function drawPlanet() {
-    //console.log('Planet Radius',planet.radius,'RGB',planet.r, planet.g, planet.b);
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
-    //drawCircle(planet.x, planet.y, (planet.radius + 1), rgbaString(0,0,255,0.5));
     
     let shadowColor = rgbaString(0,0,0,0.9);
     let zeroToDiameter = Math.floor((planet.radius / 90 * path) % (planet.radius * 2));
     let countUp = (zeroToDiameter + planet.radius) % (planet.radius * 2);
     let countDown = (planet.radius * 2) - countUp;
-    //console.log(path, zeroToDiameter, countUp, countDown);
 
     if (path < 90) {
         // Waning crescent (shadow increasing to left)
@@ -398,32 +399,17 @@ function drawPlanet() {
         drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(sun.r, sun.g, sun.b, hazeOpacity));
     }
 
-    /*
-    let numberOfGradients = 16;
-    for (let i = -(numberOfGradients / 2); i < numberOfGradients; i++) {
-        let newColor = rgbaString(0,0,0,1/numberOfGradients);
-        let newPath = Math.abs((path + i)) % 360;
-        let newCountUp = Math.abs(countUp + i) % (planet.radius * 2);
-        let newCountDown = Math.abs(countDown + i) % (planet.radius * 2);
-        console.log('newPath',newPath, 'newCountUp:',newCountUp,'newCountDown:',newCountDown);
+    /* UPDATE STATS */
+    updateVolumeDisplay();
+    //showNewTime();
+}
 
-        //console.log(newCountUp, newCountDown);
-    
-        if (newPath < 90) {
-            // Waning crescent
-            addShadow(planet.x, planet.y, planet.radius, newCountUp, newColor);
-        } else if (newPath < 180) {
-            // Waxing crescent
-            removeShadow(planet.x, planet.y, planet.radius, newCountDown, newColor);
-        } else if (newPath < 270) {
-            // Waxing gibbous
-            removeShadow(planet.x, planet.y, planet.radius, newCountDown, newColor);
-        } else if (newPath < 360) {
-            // Waning gibbous
-            addShadow(planet.x, planet.y, planet.radius, newCountUp, newColor);
-        }    
-    }
-    */
+function updateVolumeDisplay() {
+    let newRadius = Math.cbrt((3 * planet.volume) / (4 * Math.PI));
+    newRadius = newRadius * 100 * 1.60934;
+    let newVolume = (4 / 3 * Math.PI * (newRadius ** 3) / 1000000000000).toFixed(4);
+    let newEarth = (newVolume / 1.086).toFixed(2);
+    volumeDisplay.innerText = `Volume: ${newEarth} Earth (${newVolume} trillion km^3)`;
 }
 
 /* BUTTON FUNCTIONS */
@@ -526,12 +512,12 @@ function drawStars() {
     }
 }
 
-function moveStars() {
+function moveStars(integer) {
     for (s of stars) {
-        if (s.x === canvas.width * 2 - 1) {
+        if (s.x >= canvas.width * 2 - 1) {
             s.x = 0;
         } else {
-            s.x++;
+            s.x = s.x + integer;
         }
     }
 }
@@ -539,10 +525,12 @@ function moveStars() {
 function setup() {
     clear();
     drawStars();
-    sun.x = Math.floor(canvas.width / 4);
+    sunStart = Math.floor(canvas.width / 4);
+    sun.x = sunStart;
     drawSun();
     path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
     drawPlanet();
+    showNewTime();
 }
 
 /* Sends a new message to the log; updates time of "lastMessage". */
@@ -624,6 +612,7 @@ let impactObjects = [];
 let incoming = false;
 let velocity;
 let impactLevel = 0;
+let animating = false;
 
 function drawBackground() {
     drawStars();
@@ -634,39 +623,96 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let bombardCount = 0;
+
 function animateImpact() {
     clear();
     drawBackground();
     drawImpactObject();
     drawPlanet();
-    moveImpactObject();
+    if (incoming) {
+        moveImpactObject();
+        requestAnimationFrame(animateImpact);
+    }
 }
 
-async function bombard(number) {
-    for (button of bombardButtons) {
-        button.style.visibility = "hidden";
+function drawStarsSunPlanet() {
+    clear(); // Clear canvas from last drawing
+    drawStars(); // Draw stars in new position
+    drawSun(); // Draw sun in new position
+    drawPlanet(); // Draw planet with new shading
+}
+
+function incrementTime(integer) {
+    time = time + integer;
+}
+
+function animateForward() {
+    moveSun(1);
+    moveStars(1);
+    path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
+    drawStarsSunPlanet();
+    incrementTime(timeIncrement);
+    showNewTime();
+    if (sun.x === sunStart) {
+        // If sun has made it back around to its original spot...
+        animating = false;
+        drawStarsSunPlanet();
+        showForward();
+        showNewTime();
     }
-    for (let i = 0; i < number; i++) {
-        incoming = true;
-        //console.log("Impact #", i);
-        createImpactObject();
-        while (incoming) {
-            await delay(2);
-            animateImpact();
-        }
-        clear();
-        drawBackground();
-        drawPlanet();
+    if (animating) {
+        requestAnimationFrame(animateForward);
     }
+}
+
+function showBombard() {
     for (button of bombardButtons) {
         button.style.visibility = "visible";
     }
 }
 
+function hideBombard() {
+    for (button of bombardButtons) {
+        button.style.visibility = "hidden";
+    }
+}
+
+function showForward() {
+    for (button of forwardButtons) {
+        button.style.visibility = "visible";
+    }
+}
+
+function hideForward() {
+    for (button of forwardButtons) {
+        button.style.visibility = "hidden";
+    }
+}
+
+function bombard(number) {
+    hideBombard();
+    for (let i = 0; i < number; i++) {
+        incoming = true;
+        createImpactObject();
+        animateImpact();
+        clear();
+        drawBackground();
+        drawPlanet();
+    }
+}
+
+function forward(incomingNumber) {
+    timeIncrement = incomingNumber * 1000000 / canvas.width * 2 / 4;
+    hideForward();
+    animating = true;
+    animateForward();
+}
+
 function createImpactObject() {
     let impactObjectSize = Math.floor(Math.random() * 9) + 1;
-    impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [100,100,100,1]));
-    velocity = Math.floor(Math.random() * 3) + 3;
+    impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [75,75,75,1]));
+    velocity = Math.floor(Math.random() * 4) + 2;
     if (randomPercentage(50) < 50) {
         velocity = 0 - velocity;
         impactObjects[0].x = canvas.width;
@@ -677,30 +723,8 @@ function createImpactObject() {
 function drawImpactObject() {
     let impactObject = impactObjects[0];
     drawCircle(impactObject.x, impactObject.y, impactObject.radius, impactObject.color);
+
     //shadow(impactObject);
-}
-
-function calculatePlanetRadius(impactObject) {
-    //console.log("Impact object volume:", impactObject.volume);
-    //console.log("Planet radius:", planet.radius);
-    //console.log("Planet volume:", planet.volume);
-    let newVolume = planet.volume + impactObject.volume;
-    //console.log("New Volume:", newVolume);
-    let newRadius = Math.floor(Math.cbrt((3 * newVolume) / (4 * Math.PI)));
-    //console.log("New Radius:", newRadius);
-    if (newRadius > planet.radius) {
-        newMessage('Planet size has increased!');
-    }
-    planet.radius = newRadius;
-    planet.volume = newVolume;
-    //console.log("New planet radius:", planet.radius);
-    //console.log("New planet volume:", planet.volume);
-}
-
-function moveImpactObject() {
-    let impactObject = impactObjects[0];
-    impactObject.x += velocity;
-    //console.log(impactObject.x);
 
     if (velocity > 0 && impactObject.x + impactObject.radius >= planet.x - planet.radius) {
         impactLevel++;
@@ -725,16 +749,40 @@ function moveImpactObject() {
         //if (impactObject.radius > 1) {impactObject.radius = impactObject.radius - 1;}
     }
     
-    if (velocity > 0 && impactObject.x - impactObject.radius >= planet.x - planet.radius) {
-        calculatePlanetRadius(impactObject);
-        destroyImpactObject();      
-        impactLevel = 0;
-        
-    } else if (velocity < 0 && impactObject.x + impactObject.radius <= planet.x + planet.radius) {
+    if (velocity > 0 && impactObject.x - impactObject.radius >= planet.x - planet.radius ||
+        velocity < 0 && impactObject.x + impactObject.radius <= planet.x + planet.radius) {
         calculatePlanetRadius(impactObject);
         destroyImpactObject();
+        incoming = false;
         impactLevel = 0;
+        clear();
+        drawBackground();
+        drawPlanet();
+        showBombard();
     }
+}
+
+function calculatePlanetRadius(impactObject) {
+    //console.log("Impact object volume:", impactObject.volume);
+    //console.log("Planet radius:", planet.radius);
+    //console.log("Planet volume:", planet.volume);
+    let newVolume = planet.volume + impactObject.volume;
+    //console.log("New Volume:", newVolume);
+    let newRadius = Math.floor(Math.cbrt((3 * newVolume) / (4 * Math.PI)));
+    //console.log("New Radius:", newRadius);
+    if (newRadius > planet.radius) {
+        newMessage('Planet size has increased!');
+    }
+    planet.radius = newRadius;
+    planet.volume = newVolume;
+    //console.log("New planet radius:", planet.radius);
+    //console.log("New planet volume:", planet.volume);
+}
+
+function moveImpactObject() {
+    let impactObject = impactObjects[0];
+    impactObject.x += velocity;
+    //console.log(impactObject.x);
 }
 
 function destroyImpactObject() {
@@ -742,6 +790,7 @@ function destroyImpactObject() {
     impactObjects.pop();
 }
 
+/*
 function drawFrame() {
     if (pause === false) {
     // If not paused...
@@ -750,12 +799,13 @@ function drawFrame() {
         clear(); // Clear canvas from last drawing
         drawStars(); // Draw stars in new position
         drawSun(); // Draw sun in new position
+        /*
         if (incoming) {
             drawImpactObject();
             moveImpactObject();
         }
-        drawPlanet(); // Draw planet with new
-        time = time + (timeDelay * 10000); // Increment time
+        drawPlanet(); // Draw planet with new shading
+        //time = time + (timeDelay * 10000); // Increment time
     } else {
     // If paused...
         // Draw sun, stars, and planet in last position before pause
@@ -767,15 +817,15 @@ function drawFrame() {
     }
     tryClearLog(); // Check duration of last message; clear after some # of seconds
 
-    /*
     if (time >= 9500000000) {
         if (sun.x != canvas.width / 2) {
             moveStars();
             moveSun();
         }
     }
-    */
+    
 }
+*/
 
 function main() {
     setup();

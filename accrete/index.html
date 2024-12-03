@@ -20,7 +20,7 @@
                         </colgroup>
                         <tr>
                             <td width>Size</td>
-                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="20" onchange="getUserInput()"/></td>
+                            <td><input title="1 - 80" id="input-size" type="number" min="1" max="80" value="40" onchange="getUserInput()"/></td>
                         </tr>
                         <tr>
                             <td width>Color (RGB)</td>
@@ -33,9 +33,13 @@
                             </td>
                         </tr>
                     </table>
-                    <div>
-                        <button class="bombard" onclick="bombard(1)">Bombard x1</button>
-                        <button class="bombard" onclick="bombard(10)">Bombard x10</button>
+                    <div class="input-buttons">
+                        <button class="bombard" onclick="bombard(1)">Bombard</button>
+                        <!--<button class="bombard" onclick="bombard(10)">Bombard x10</button>-->
+                    </div>
+                    <div class="input-buttons">
+                        <button class="forward" onclick="forward(10)">&#x23E9; 10M Years</button>
+                        <button class="forward" onclick="forward(100)">&#x23E9; 100M Years</button>
                     </div>
                 </div>
             </section>
@@ -47,6 +51,7 @@
             </section>
             <section id="stat-display" class="panel">
                 <div id="time-display" class="stat">Year: 0</div>
+                <div id="volume-display" class="stat">Volume: 0</div>
             </section>
         </main>
         <footer></footer>
