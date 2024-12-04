@@ -4,6 +4,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
 const volumeDisplay = document.getElementById('volume-display');
+const tempDisplay = document.getElementById('temp-display');
 let log = document.querySelector('#log-text');
 let bombardButtons = document.getElementsByClassName('bombard');
 let forwardButtons = document.getElementsByClassName('forward');
@@ -12,6 +13,12 @@ const planets = [];
 const numStars = 8000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.03], [0,0,140,0.06], [0,0,140,0.06], [0,0,140,0.06]];
 let time = 4500000000;
+let timeIncrement = 0; // Used by Forward() to determine years per sun-movement
+let tempAdded = 0;
+let tempAtmosphere = 0;
+let tempSun = -410;
+let temp = -410;
+let o2 = 0;
 let sunRadius = 16;
 let planetRadius = 0; // DEFAULT = 0
 let planetColor = [0, 0, 0, 1]; // DEFAULT = black
@@ -23,7 +30,7 @@ let inputColorB = parseInt(document.querySelector('#input-color-b').value);
 let lastMessage;
 let pause = false;
 let sunStart;
-let timeIncrement;
+let volumeEarths;
 
 /* DEFINE SKYOBJECT CLASS: sun, stars, planets */
 class SkyObject {
@@ -409,6 +416,7 @@ function updateVolumeDisplay() {
     newRadius = newRadius * 100 * 1.60934;
     let newVolume = (4 / 3 * Math.PI * (newRadius ** 3) / 1000000000000).toFixed(4);
     let newEarth = (newVolume / 1.086).toFixed(2);
+    volumeEarths = newEarth;
     volumeDisplay.innerText = `Volume: ${newEarth} Earth (${newVolume} trillion km^3)`;
 }
 
@@ -530,7 +538,8 @@ function setup() {
     drawSun();
     path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
     drawPlanet();
-    showNewTime();
+    newTime();
+    newTemp();
 }
 
 /* Sends a new message to the log; updates time of "lastMessage". */
@@ -548,6 +557,16 @@ function pauseUnpause() {
         pause = false;
         newMessage("Simulation resumed.");
     }
+}
+
+let messageEarthSized = true;
+
+function checkUpdates() {
+
+}
+
+function checkMessages() {
+    if (volumeEarths == 1.00 && messageEarthSized) {newMessage("Your planet is Earth-sized!"); messageEarthSized = false};
 }
 
 function displayPaused() {
@@ -592,6 +611,30 @@ function slower() {
     console.log(timeDelay);
 }
 
+function calculateNewTemp(years) {
+    if (tempAdded > 0) {tempAdded = tempAdded - (years * 0.0001);} else {tempAdded = 0;}
+    tempAtmosphere = (90 * volumeEarths) + (-0.666 * o2);
+    tempSun = -410 + (time / 100000000 * 9);
+    temp = tempSun + tempAdded + tempAtmosphere;
+    //console.log(`Sun: ${tempSun}, Atmosphere: ${tempAtmosphere}, Impacts: ${tempAdded}`);
+}
+
+function showNewTemp() {
+    let tempFahrenheit = (temp).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    let tempCelsius = ((temp - 32) * 5 / 9).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    let formattedTemp = `Temperature: ${tempFahrenheit} F (${tempCelsius} C)`;
+    tempDisplay.textContent = formattedTemp;
+}
+
+function newTemp(optionalIncrement) {
+    if (optionalIncrement === null || optionalIncrement === undefined) {
+        calculateNewTemp(timeIncrement);
+    } else {
+        calculateNewTemp(optionalIncrement);
+    }
+    showNewTemp();
+}
+
 function showNewTime() {
     let year = time;
     let formattedYear;
@@ -630,6 +673,7 @@ function animateImpact() {
     drawBackground();
     drawImpactObject();
     drawPlanet();
+    showNewTemp();
     if (incoming) {
         moveImpactObject();
         requestAnimationFrame(animateImpact);
@@ -647,19 +691,25 @@ function incrementTime(integer) {
     time = time + integer;
 }
 
+function newTime() {
+    incrementTime(timeIncrement);
+    showNewTime();
+}
+
 function animateForward() {
     moveSun(1);
     moveStars(1);
     path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
     drawStarsSunPlanet();
-    incrementTime(timeIncrement);
-    showNewTime();
+    newTime();
+    newTemp();
     if (sun.x === sunStart) {
         // If sun has made it back around to its original spot...
         animating = false;
         drawStarsSunPlanet();
         showForward();
         showNewTime();
+        showNewTemp();
     }
     if (animating) {
         requestAnimationFrame(animateForward);
@@ -710,14 +760,19 @@ function forward(incomingNumber) {
 }
 
 function createImpactObject() {
-    let impactObjectSize = Math.floor(Math.random() * 9) + 1;
+    let impactObjectSize = Math.floor(Math.random() * 9) + 1; // Between 1 and 10
     impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [75,75,75,1]));
-    velocity = Math.floor(Math.random() * 4) + 2;
+    velocity = Math.floor(Math.random() * 3) + 2; // Between 2 and 5
     if (randomPercentage(50) < 50) {
         velocity = 0 - velocity;
         impactObjects[0].x = canvas.width;
     }
     //console.log('Volume:', impactObjects[0].volume);
+}
+
+function calculateTempAdded(size, speed) {
+    let impactTemp = size * 10 * (speed * speed);
+    return impactTemp;
 }
 
 function drawImpactObject() {
@@ -758,18 +813,15 @@ function drawImpactObject() {
         clear();
         drawBackground();
         drawPlanet();
+        tempAdded = tempAdded + calculateTempAdded(impactObject.radius / 2, velocity);
+        newTemp(0);
         showBombard();
     }
 }
 
 function calculatePlanetRadius(impactObject) {
-    //console.log("Impact object volume:", impactObject.volume);
-    //console.log("Planet radius:", planet.radius);
-    //console.log("Planet volume:", planet.volume);
     let newVolume = planet.volume + impactObject.volume;
-    //console.log("New Volume:", newVolume);
     let newRadius = Math.floor(Math.cbrt((3 * newVolume) / (4 * Math.PI)));
-    //console.log("New Radius:", newRadius);
     if (newRadius > planet.radius) {
         newMessage('Planet size has increased!');
     }
@@ -830,6 +882,8 @@ function drawFrame() {
 function main() {
     setup();
     setInterval(tryClearLog, 500);
+    //setInterval(checkUpdates, 500);
+    setInterval(checkMessages, 500);
 }
 
 function begin() {
