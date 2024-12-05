@@ -12,7 +12,7 @@ const stars = [];
 const planets = [];
 const numStars = 8000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.03], [0,0,140,0.06], [0,0,140,0.06], [0,0,140,0.06]];
-let time = 4500000000;
+let time = 9400000000;
 let timeIncrement = 0; // Used by Forward() to determine years per sun-movement
 let tempAdded = 0;
 let tempAtmosphere = 0;
@@ -740,11 +740,11 @@ function hideForward() {
     }
 }
 
-function bombard(number) {
+function bombard(number, size) {
     hideBombard();
     for (let i = 0; i < number; i++) {
         incoming = true;
-        createImpactObject();
+        createImpactObject(size);
         animateImpact();
         clear();
         drawBackground();
@@ -759,19 +759,32 @@ function forward(incomingNumber) {
     animateForward();
 }
 
-function createImpactObject() {
-    let impactObjectSize = Math.floor(Math.random() * 9) + 1; // Between 1 and 10
+function createImpactObject(size) {
+    let impactObjectSize;
+    // Size between 1 and 10 inclusive
+    if (size == 1) {
+        impactObjectSize = 1;
+    } else if (size == 4) {
+        impactObjectSize = Math.floor(Math.random() * 3) + 2;
+    } else if (size == 7) {
+        impactObjectSize = Math.floor(Math.random() * 3) + 5;
+    } else {
+        impactObjectSize = Math.floor(Math.random() * 3) + 7;
+    }
+    //let impactObjectSize = Math.floor(Math.random() * size) + 1;
     impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [75,75,75,1]));
-    velocity = Math.floor(Math.random() * 3) + 2; // Between 2 and 5
+    velocity = Math.floor(Math.random() * 2) + 2; // Between 2 and 3
     if (randomPercentage(50) < 50) {
         velocity = 0 - velocity;
         impactObjects[0].x = canvas.width;
     }
     //console.log('Volume:', impactObjects[0].volume);
+    //console.log('Size:', impactObjectSize, "Speed:", velocity);
 }
 
 function calculateTempAdded(size, speed) {
     let impactTemp = size * 10 * (speed * speed);
+    //console.log('Temp Increase:', impactTemp);
     return impactTemp;
 }
 
