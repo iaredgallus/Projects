@@ -377,11 +377,54 @@ function shadow(object) {
     }
 }
 
+function drawHeatOverlay() {
+    let heatR = 255;
+    let heatG = 0;
+    let heatB = 0;
+    let heatA = 0;
+    let percentOfTransition = 0;
+    let hot = false;
+    let veryHot = false;
+    if (temp > 1800) {
+        heatG = 165;
+        heatA = 0.9;
+        veryHot = true;
+    } else if (temp > 1500) {
+        percentOfTransition = (300 - 1800 + temp) / 300;
+        heatG = Math.floor(percentOfTransition * 165);
+        heatA = 0.9;
+        hot = true;
+    } else if (temp >= 900) {
+        percentOfTransition = (600 - 1500 + temp) / 600;
+        if (percentOfTransition > 0.9) {heatA = 0.9} else {heatA = percentOfTransition};
+    }
+
+    if (veryHot) {
+        drawCircle(planet.x, planet.y, planet.radius + 8, rgbaString(heatR, heatG, heatB, 0.0675));
+        drawCircle(planet.x, planet.y, planet.radius + 4, rgbaString(heatR, heatG, heatB, 0.0675));
+        drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.125));
+        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.125));
+        //console.log('Drawing very hot glow.');
+    } 
+    if (hot) {
+        drawCircle(planet.x, planet.y, planet.radius + 4, rgbaString(heatR, heatG, heatB, 0.0675));
+        drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.125));
+        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.125));
+        //console.log('Drawing hot glow.');
+    }
+
+    drawCircle(planet.x, planet.y, planet.radius, rgbaString(heatR, heatG, heatB, heatA));
+
+    return 1 - heatA;
+}
+
 
 function drawPlanet() {
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
+    let shadowA = drawHeatOverlay();
+    //console.log(planet.radius);
     
-    let shadowColor = rgbaString(0,0,0,0.9);
+    let shadowColor = rgbaString(0,0,0,shadowA);
     let zeroToDiameter = Math.floor((planet.radius / 90 * path) % (planet.radius * 2));
     let countUp = (zeroToDiameter + planet.radius) % (planet.radius * 2);
     let countDown = (planet.radius * 2) - countUp;
