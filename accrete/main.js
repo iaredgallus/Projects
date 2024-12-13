@@ -20,7 +20,7 @@ let tempSun = -410;
 let temp = -410;
 let o2 = 0;
 let sunRadius = 16;
-let planetRadius = 0; // DEFAULT = 0
+let planetRadius = 39; // DEFAULT = 0
 let planetColor = [0, 0, 0, 1]; // DEFAULT = black
 let path;
 let inputSize = parseInt(document.querySelector('#input-size').value);
@@ -136,6 +136,7 @@ let sun = new SkyObject([0, canvas.height / 2], sunRadius, [255,255,255,1]);
 
 /* CREATE PLANET */
 let planet = new SkyObject([canvas.width / 2, canvas.height / 2], planetRadius, planetColor);
+
 // Pull any default values from the HTML inputs if they exist.
 if (inputColorR != null && inputColorG != null && inputColorB != null) {
     planetColor
@@ -149,7 +150,7 @@ function calculateVolume() {
     return 4 / 3 * Math.PI * (planet.radius ** 3);
 }
 
-if (inputSize != null) {
+if (inputSize != null && inputSize > 0 && inputSize <= 80) {
     planet.radius = inputSize;
     planet.volume = 4 / 3 * Math.PI * (planet.radius ** 3);
     //console.log("Planet volume:", planet.volume);
@@ -249,7 +250,8 @@ function getUserInput() {
         }
         planet.b = inputColorB;
     }
-    if (inputSize >= 1 && inputSize <= 80 && inputSize != null) {
+    if (inputSize >= 1 && inputSize <= 80 && inputSize != null && inputSize != "") {
+        console.log("Input size accepted.");
         if (inputSize > planet.radius) {
             log.textContent = "Planet size increased.";
         } else if (inputSize < planet.radius) {
@@ -257,6 +259,7 @@ function getUserInput() {
         }
         planet.radius = inputSize;
     }
+    //console.log(planet.radius);
     lastMessage = Date.now();
     //console.log(lastMessage);
     //console.log('Size:',planet.radius,'R:',planet.r,'G:',planet.g,'B:',planet.b);
@@ -426,10 +429,60 @@ function drawHeatOverlay() {
     return 1 - heatA;
 }
 
+function updateVolumeDisplay() {
+    let newRadius = Math.cbrt((3 * planet.volume) / (4 * Math.PI));
+    newRadius = newRadius * 100 * 1.60934;
+    let newVolume = (4 / 3 * Math.PI * (newRadius ** 3) / 1000000000000).toFixed(4);
+    let newEarth = (newVolume / 1.086).toFixed(2);
+    volumeEarths = newEarth;
+    volumeDisplay.innerText = `Volume: ${newEarth} Earth (${newVolume} trillion km^3)`;
+}
+
+function drawAtmosphere() {
+    let opacity;
+    let color;
+    if (volumeEarths >= 1.00) {
+        opacity = 0.5;
+    } else if (volumeEarths < 0.1) {
+        opacity = 0;
+    } else {
+        opacity = volumeEarths / 4;
+    }
+
+    drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(135,206,235,opacity));
+}
+
+function drawOcean() {
+
+    drawCircle(planet.x, planet.y, planet.radius, rgbaString(0,90,140, 1));
+    /*
+    for (let i = 0; i < 1000; i++) {
+        let randomX = Math.floor(Math.random() * planet.radius);
+        let randomY = Math.floor(Math.random() * planet.radius);
+        if (randomPercentage() < 50) {
+            randomX = planet.x - randomX;
+        } else {
+            randomX = planet.x + randomX;
+        }
+        if (randomPercentage() < 50) {
+            randomY = planet.y - randomY;
+        } else {
+            randomY = planet.y + randomY;
+        }
+        console.log(randomX, randomY);
+        drawCircle(randomX, randomY, 1, rgbaString(0,90,140,0.5));
+    }
+    console.log("Ocean drawn.");
+    */
+}
+
 
 function drawPlanet() {
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
-    let shadowA = drawHeatOverlay();
+    drawOcean();
+    if (volumeEarths >= 0.1) {drawAtmosphere();}
+    let shadowA = 0.9;
+    if (temp >= 900) {shadowA = drawHeatOverlay();}
     
     let shadowColor = rgbaString(0,0,0,shadowA);
     let zeroToDiameter = Math.floor((planet.radius / 90 * path) % (planet.radius * 2));
@@ -459,15 +512,6 @@ function drawPlanet() {
     /* UPDATE STATS */
     updateVolumeDisplay();
     //showNewTime();
-}
-
-function updateVolumeDisplay() {
-    let newRadius = Math.cbrt((3 * planet.volume) / (4 * Math.PI));
-    newRadius = newRadius * 100 * 1.60934;
-    let newVolume = (4 / 3 * Math.PI * (newRadius ** 3) / 1000000000000).toFixed(4);
-    let newEarth = (newVolume / 1.086).toFixed(2);
-    volumeEarths = newEarth;
-    volumeDisplay.innerText = `Volume: ${newEarth} Earth (${newVolume} trillion km^3)`;
 }
 
 /* BUTTON FUNCTIONS */
@@ -581,11 +625,31 @@ function moveStars(integer) {
 }
 
 function reset() {
-    time = 0;
-    planet.radius = 2;
-    planet.volume = calculateVolume();
-    updateVolumeDisplay();
-    setup();
+    incoming = false;
+    animating = false;
+    setTimeout(() => {
+        time = 0;
+        planet.radius = 2;
+        tempAdded = 0;
+        tempAtmosphere = 0;
+        calculateNewTemp(0);
+        planet.volume = calculateVolume();
+        updateVolumeDisplay();
+        sun.color = [255,255,255,1];
+        clear();
+        drawStars();
+        sunStart = Math.floor(canvas.width / 4);
+        sun.x = sunStart;
+        drawSun();
+        path = calculatePath360();
+        calculateNewTemp();
+        showNewTemp();
+        drawPlanet();
+        showNewTime();
+        showBombard();
+        showForward();
+        forceClearLog();
+    }, 500);
 }
 
 function setup() {
@@ -595,6 +659,7 @@ function setup() {
     sun.x = sunStart;
     drawSun();
     path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
+    updateVolumeDisplay();
     drawPlanet();
     newTime();
     newTemp();
@@ -618,22 +683,15 @@ function pauseUnpause() {
 }
 
 let messageEarthSized = true;
-let messageVeryHot = true;
-let messageHot = true;
-let messageHeatingUp = true;
 let messageSunOld = true;
-
-function resetTempMessages() {
-    messageHeatingUp = true;
-    messageHot = true;
-    messageVeryHot = true;
-}
+let messageAtmosphere = true;
 
 function checkUpdates() {
     // if (temp < 900 && temp > 850) {resetTempMessages()};
 }
 
 function checkMessages() {
+    if (volumeEarths >= 0.10 && messageAtmosphere) {newMessage("Your planet is big enough to retain an atmosphere."); messageAtmosphere = false};
     if (volumeEarths == 1.00 && messageEarthSized) {newMessage("Your planet is Earth-sized!"); messageEarthSized = false};
     if (time > 9500000000 && messageSunOld) {newMessage("The sun's hydrogen is nearly gone. Prepare for expansion..."); messageSunOld = false};
     /*
@@ -657,6 +715,10 @@ function tryClearLog() {
     if (now - lastMessage >= 5000) {
         log.textContent = "";
     }
+}
+
+function forceClearLog() {
+    log.textContent = "";
 }
 
 /* Hides the "Begin" button and displays the in-game log and stat panel. */
