@@ -125,6 +125,11 @@ canvas {
     display: none;
 }
 
+#start-over {
+    display: none;
+    justify-content: center;
+}
+
 
 @media screen and (max-width:500px) {
 

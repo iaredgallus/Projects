@@ -144,6 +144,11 @@ if (inputColorR != null && inputColorG != null && inputColorB != null) {
     planet.b = inputColorB;
     planet.a = 1;
 }
+
+function calculateVolume() {
+    return 4 / 3 * Math.PI * (planet.radius ** 3);
+}
+
 if (inputSize != null) {
     planet.radius = inputSize;
     planet.volume = 4 / 3 * Math.PI * (planet.radius ** 3);
@@ -385,6 +390,7 @@ function drawHeatOverlay() {
     let percentOfTransition = 0;
     let hot = false;
     let veryHot = false;
+    let warm = false;
     if (temp > 1800) {
         heatG = 165;
         heatA = 0.9;
@@ -397,8 +403,10 @@ function drawHeatOverlay() {
     } else if (temp >= 900) {
         percentOfTransition = (600 - 1500 + temp) / 600;
         if (percentOfTransition > 0.9) {heatA = 0.9} else {heatA = percentOfTransition};
+        warm = true;
     }
 
+    // Simple "Glow" Code
     if (veryHot) {
         drawCircle(planet.x, planet.y, planet.radius + 8, rgbaString(heatR, heatG, heatB, 0.0675));
         drawCircle(planet.x, planet.y, planet.radius + 4, rgbaString(heatR, heatG, heatB, 0.0675));
@@ -406,7 +414,7 @@ function drawHeatOverlay() {
         drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.125));
         //console.log('Drawing very hot glow.');
     } 
-    if (hot) {
+    if (hot || warm) {
         drawCircle(planet.x, planet.y, planet.radius + 4, rgbaString(heatR, heatG, heatB, 0.0675));
         drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.125));
         drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.125));
@@ -422,7 +430,6 @@ function drawHeatOverlay() {
 function drawPlanet() {
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
     let shadowA = drawHeatOverlay();
-    //console.log(planet.radius);
     
     let shadowColor = rgbaString(0,0,0,shadowA);
     let zeroToDiameter = Math.floor((planet.radius / 90 * path) % (planet.radius * 2));
@@ -573,6 +580,14 @@ function moveStars(integer) {
     }
 }
 
+function reset() {
+    time = 0;
+    planet.radius = 2;
+    planet.volume = calculateVolume();
+    updateVolumeDisplay();
+    setup();
+}
+
 function setup() {
     clear();
     drawStars();
@@ -603,13 +618,29 @@ function pauseUnpause() {
 }
 
 let messageEarthSized = true;
+let messageVeryHot = true;
+let messageHot = true;
+let messageHeatingUp = true;
+let messageSunOld = true;
+
+function resetTempMessages() {
+    messageHeatingUp = true;
+    messageHot = true;
+    messageVeryHot = true;
+}
 
 function checkUpdates() {
-
+    // if (temp < 900 && temp > 850) {resetTempMessages()};
 }
 
 function checkMessages() {
     if (volumeEarths == 1.00 && messageEarthSized) {newMessage("Your planet is Earth-sized!"); messageEarthSized = false};
+    if (time > 9500000000 && messageSunOld) {newMessage("The sun's hydrogen is nearly gone. Prepare for expansion..."); messageSunOld = false};
+    /*
+    if (temp > 1800 && messageVeryHot) {newMessage("Your planet is very hot."); messageVeryHot = false}
+    if (temp > 1500 && messageHot) {newMessage("Your planet is hot."); messageHot = false}
+    if (temp > 900 && messageHeatingUp) {newMessage("Your planet is heating up."); messageHeatingUp = false}
+    */
 }
 
 function displayPaused() {
@@ -634,6 +665,7 @@ function showPanels() {
     document.querySelector('#input-container').style.display = "block";
     document.querySelector('#log').style.display = "flex";
     document.querySelector('#stat-display').style.display = "block";
+    document.querySelector('#start-over').style.display = "flex";
 }
 
 function calculatePath360() {
@@ -655,10 +687,14 @@ function slower() {
 }
 
 function calculateNewTemp(years) {
+    let redGiantDegrees = 0;
     if (tempAdded > 0) {tempAdded = tempAdded - (years * 0.0001);} else {tempAdded = 0;}
     tempAtmosphere = (90 * volumeEarths) + (-0.666 * o2);
+    if (time > 9500000000) {
+        redGiantDegrees = Math.floor((time - 9500000000) / 250000);
+    }
     tempSun = -410 + (time / 100000000 * 9);
-    temp = tempSun + tempAdded + tempAtmosphere;
+    temp = tempSun + tempAdded + tempAtmosphere + redGiantDegrees;
     //console.log(`Sun: ${tempSun}, Atmosphere: ${tempAtmosphere}, Impacts: ${tempAdded}`);
 }
 
@@ -869,9 +905,12 @@ function drawImpactObject() {
         clear();
         drawBackground();
         drawPlanet();
+        let impactTemp = calculateTempAdded(impactObject.radius / 2, velocity);
         tempAdded = tempAdded + calculateTempAdded(impactObject.radius / 2, velocity);
         newTemp(0);
         showBombard();
+        let message = 'Impact! Average temperature increased by ' + impactTemp + ' F.';
+        newMessage(message);
     }
 }
 
@@ -937,9 +976,9 @@ function drawFrame() {
 
 function main() {
     setup();
-    setInterval(tryClearLog, 500);
-    //setInterval(checkUpdates, 500);
+    setInterval(tryClearLog, 400);
     setInterval(checkMessages, 500);
+    setInterval(checkUpdates, 500);
 }
 
 function begin() {
