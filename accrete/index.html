@@ -26,9 +26,9 @@
                             <td width>Color (RGB)</td>
                             <td>
                                 <div id="color-rgb">
-                                    <input title="0 - 255" id="input-color-r" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
-                                    <input title="0 - 255" id="input-color-g" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
-                                    <input title="0 - 255" id="input-color-b" type="number" min="0" max="255" value="100" onchange="getUserInput()"/>
+                                    <input title="0 - 255" id="input-color-r" type="number" min="0" max="255" value="50" onchange="getUserInput()"/>
+                                    <input title="0 - 255" id="input-color-g" type="number" min="0" max="255" value="50" onchange="getUserInput()"/>
+                                    <input title="0 - 255" id="input-color-b" type="number" min="0" max="255" value="50" onchange="getUserInput()"/>
                                 </div>
                             </td>
                         </tr>
@@ -39,11 +39,13 @@
                         <button class="bombard" onclick="bombard(1, 4)">S</button>
                         <button class="bombard" onclick="bombard(1, 7)">M</button>
                         <button class="bombard" onclick="bombard(1, 9)">L</button>
+                        <button class="bombard" onclick="bombard(1,15)">XL</button>
                         <!--<button class="bombard" onclick="bombard(10)">Bombard x10</button>-->
                     </div>
                     <div class="input-buttons">
                         <button class="forward" onclick="forward(10)">&#x23E9; 10M Years</button>
                         <button class="forward" onclick="forward(100)">&#x23E9; 100M Years</button>
+                        <button class="forward" onclick="forward(500)">&#x23E9; 500M Years</button>
                     </div>
                 </div>
             </section>
@@ -57,6 +59,8 @@
                 <div id="time-display" class="stat">Year: 0</div>
                 <div id="volume-display" class="stat">Volume: 0</div>
                 <div id="temp-display" class="stat">Temperature: 0</div>
+                <div id="magnetic-display" class="stat">Magnetic Field: 0%</div>
+                <div id="water-display" class="stat">Water: 0.00 | Gas: 0.00</div>
             </section>
             <section id="start-over">
                 <button onclick="reset()">Start Over</button>

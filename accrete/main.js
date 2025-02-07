@@ -5,23 +5,31 @@ const ctx = canvas.getContext('2d');
 const timeDisplay = document.getElementById('time-display');
 const volumeDisplay = document.getElementById('volume-display');
 const tempDisplay = document.getElementById('temp-display');
+const magneticDisplay = document.getElementById('magnetic-display');
+const waterDisplay = document.getElementById('water-display');
 let log = document.querySelector('#log-text');
 let bombardButtons = document.getElementsByClassName('bombard');
 let forwardButtons = document.getElementsByClassName('forward');
-const stars = [];
+let sun;
+let planet;
+let stars = [];
+let debris = [];
 const planets = [];
 const numStars = 8000;
+const numDebris = 10000;
 let galaxyColors = [[255,140,0,0.02], [230,85,125,0.03], [0,0,140,0.06], [0,0,140,0.06], [0,0,140,0.06]];
-let time = 9400000000;
+let time = 0; // 9400000000 (near-earth)
 let timeIncrement = 0; // Used by Forward() to determine years per sun-movement
 let tempAdded = 0;
 let tempAtmosphere = 0;
 let tempSun = -410;
 let temp = -410;
+let tempInternalHeat = 0;
+let tempDebris = 0;
 let o2 = 0;
 let sunRadius = 16;
-let planetRadius = 39; // DEFAULT = 0
-let planetColor = [0, 0, 0, 1]; // DEFAULT = black
+let planetRadius = 2; // DEFAULT = 0, Earth = 40, Mars = 20
+const planetColor = [50, 50, 50, 1]; // DEFAULT = dark gray
 let path;
 let inputSize = parseInt(document.querySelector('#input-size').value);
 let inputColorR = parseInt(document.querySelector('#input-color-r').value);
@@ -31,6 +39,15 @@ let lastMessage;
 let pause = false;
 let sunStart;
 let volumeEarths;
+let totalImpactVolume = 0;
+let atmosphere = 0;
+let water = 0;
+let hasAtmosphere = false;
+let hasWater = false;
+let waterInAir = false;
+let waterOnLand = false;
+let hasIce = false;
+let magneticField = 0;
 
 /* DEFINE SKYOBJECT CLASS: sun, stars, planets */
 class SkyObject {
@@ -101,8 +118,8 @@ class SkyObject {
         this._volume = newVolume;
     }
 
-    set color(rgbaString) {
-        this._color = rgbaString;
+    set color(array) {
+        this._color = array;
     }
 
     set r(value) {
@@ -131,93 +148,124 @@ function rgbaString(r, g, b, a) {
     return `rgba(${r},${g},${b},${a})`;
 }
 
-/* CREATE SUN, PLANET */
-let sun = new SkyObject([0, canvas.height / 2], sunRadius, [255,255,255,1]);
+function initialize() {
+    /* CREATE SUN, PLANET */
+    sun = new SkyObject([0, canvas.height / 2], sunRadius, [255,255,255,1]);
+    /* CREATE PLANET */
+    planet = new SkyObject([canvas.width / 2, canvas.height / 2], planetRadius, planetColor);
+    /* PULL USER CHOICES
+    if (inputColorR != null && inputColorG != null && inputColorB != null) {
+        planet.r = inputColorR;
+        planet.g = inputColorG;
+        planet.b = inputColorB;
+        planet.a = 1;
+    }*/
+    if (inputSize != null && inputSize > 0 && inputSize <= 80) {
+        planet.radius = inputSize;
+        planet.volume = 4 / 3 * Math.PI * (planet.radius ** 3);
+    }
+    /* FILL STARS ARRAY */
+    for (let i = 0; i < numStars; i++) {
+        let randomX = Math.floor(Math.random() * canvas.width * 2);
+        let randomY;
+        let galaxy = false;
+        // Determine density of stars
+        if (randomPercentage() < 10) {
+            randomY = Math.floor(Math.random() * canvas.height);
+        } else if (randomPercentage() < 20) {
+            randomY = Math.floor(Math.random() * (canvas.height * 0.9 - canvas.height * 0.1 + 1) + canvas.height * 0.1);
+        } else if (randomPercentage() < 30) {
+            randomY = Math.floor(Math.random() * (canvas.height * 0.8 - canvas.height * 0.2 + 1) + canvas.height * 0.2);
+        } else if (randomPercentage() < 40) {
+            randomY = Math.floor(Math.random() * (canvas.height * 0.7 - canvas.height * 0.3 + 1) + canvas.height * 0.3);
+            // Add galaxy haze to near-middle of the sky, 5% chance
+            if (randomPercentage() < 5) {
+                galaxy = true;
+            }
+        } else if (randomPercentage() < 50) {
+            randomY = Math.floor(Math.random() * (canvas.height * 0.6 - canvas.height * 0.4 + 1) + canvas.height * 0.4);
+            // Add galaxy haze to near-middle of the sky, 10% chance
+            if (randomPercentage() < 10) {
+                galaxy = true;
+            }
+        } else {
+            randomY = Math.floor(Math.random() * (canvas.height * 0.55 - canvas.height * 0.45 + 1) + canvas.height * 0.45);
+            // Add galaxy haze to middle of the sky, 15% chance
+            if (randomPercentage() < 6) {
+                galaxy = true;
+            }
+        }
+        // Select random RGBA values
+        let position = [randomX, randomY];
+        let randomR = Math.floor(Math.random() * 30 + 225);
+        let randomG = Math.floor(Math.random() * 30 + 225);
+        let randomB = Math.floor(Math.random() * 30 + 225);
+        let randomA = Math.random() + 0.85;
+        if (randomA > 1) {randomA = 1};
+        // Determine size of star objects
+        let radius;
+        if (i % 60 == 0) {
+            // Big star, 10% of sky
+            radius = 1;
+        } else if (galaxy) {
+            // Galaxy haze
+            let randomIndex = Math.floor(Math.random() * 4);
+            randomR = galaxyColors[randomIndex][0];
+            randomG = galaxyColors[randomIndex][1];
+            randomB = galaxyColors[randomIndex][2];
+            randomA = galaxyColors[randomIndex][3];
+            radius = 35;
+        } else {
+            // Small star
+            radius = 0.5;
+        }
+        let skyObject = new SkyObject(position, radius, [randomR, randomG, randomB, randomA]);
+        stars.push(skyObject);
+    }
+    /* FILL DEBRIS ARRAY */
+    fillDebrisArray();
+}
 
-/* CREATE PLANET */
-let planet = new SkyObject([canvas.width / 2, canvas.height / 2], planetRadius, planetColor);
-
-// Pull any default values from the HTML inputs if they exist.
-if (inputColorR != null && inputColorG != null && inputColorB != null) {
-    planetColor
-    planet.r = inputColorR;
-    planet.g = inputColorG;
-    planet.b = inputColorB;
-    planet.a = 1;
+function fillDebrisArray() {
+    if (time != 0) {
+        return;
+    }
+    debris = [];
+    for (i = 0; i < numDebris; i++) {
+        let randomX = Math.floor(Math.random() * canvas.width * 2);
+        let randomY;
+        // Determine density of field
+        if (randomPercentage() < 20) {
+            // Smallest zone; lowest probability
+            randomY = Math.floor(Math.random() * (canvas.height * 0.51 - canvas.height * 0.49 + 1) + canvas.height * 0.49);
+        } else if (randomPercentage() < 40) {
+            // Middle zone
+            randomY = Math.floor(Math.random() * (canvas.height * 0.53 - canvas.height * 0.47 + 1) + canvas.height * 0.47);
+        } else if (randomPercentage() < 60) {
+            // Middle zone
+            randomY = Math.floor(Math.random() * (canvas.height * 0.55 - canvas.height * 0.45 + 1) + canvas.height * 0.45);
+        } else {
+            // Widest zone; highest probability
+            randomY = Math.floor(Math.random() * (canvas.height * 0.56 - canvas.height * 0.44 + 1) + canvas.height * 0.44);
+        }
+        let position = [randomX, randomY];
+        let radius;
+        if (randomPercentage() < 10) {radius = 1.5;} else if (randomPercentage() < 50) {radius = 1;} else {radius = 0.5;}
+        let randomNumber = Math.floor(Math.random() * 1 + 75);
+        let randomR = randomNumber;
+        let randomG = randomNumber;
+        let randomB = randomNumber;
+        let randomA = Math.random() * 0.5 + 0.5;
+        if (randomA > 1) {randomA = 1};
+        let debrisObject = new SkyObject(position, radius, [randomR, randomG, randomB, randomA]);
+        debris.push(debrisObject);
+    }
+    //console.log(debris.length);
 }
 
 function calculateVolume() {
     return 4 / 3 * Math.PI * (planet.radius ** 3);
 }
-
-if (inputSize != null && inputSize > 0 && inputSize <= 80) {
-    planet.radius = inputSize;
-    planet.volume = 4 / 3 * Math.PI * (planet.radius ** 3);
-    //console.log("Planet volume:", planet.volume);
-}
-
-/* CREATE STARS */
-for (let i = 0; i < numStars; i++) {
-    let randomX = Math.floor(Math.random() * canvas.width * 2);
-    let randomY;
-    let galaxy = false;
-    // Determine density of stars
-    if (randomPercentage() < 10) {
-        randomY = Math.floor(Math.random() * canvas.height);
-    } else if (randomPercentage() < 20) {
-        randomY = Math.floor(Math.random() * (canvas.height * 0.9 - canvas.height * 0.1 + 1) + canvas.height * 0.1);
-    } else if (randomPercentage() < 30) {
-        randomY = Math.floor(Math.random() * (canvas.height * 0.8 - canvas.height * 0.2 + 1) + canvas.height * 0.2);
-    } else if (randomPercentage() < 40) {
-        randomY = Math.floor(Math.random() * (canvas.height * 0.7 - canvas.height * 0.3 + 1) + canvas.height * 0.3);
-        // Add galaxy haze to near-middle of the sky, 5% chance
-        if (randomPercentage() < 5) {
-            galaxy = true;
-        }
-    } else if (randomPercentage() < 50) {
-        randomY = Math.floor(Math.random() * (canvas.height * 0.6 - canvas.height * 0.4 + 1) + canvas.height * 0.4);
-        // Add galaxy haze to near-middle of the sky, 10% chance
-        if (randomPercentage() < 10) {
-            galaxy = true;
-        }
-    } else {
-        randomY = Math.floor(Math.random() * (canvas.height * 0.55 - canvas.height * 0.45 + 1) + canvas.height * 0.45);
-        // Add galaxy haze to middle of the sky, 15% chance
-        if (randomPercentage() < 6) {
-            galaxy = true;
-        }
-    }
-
-    // Select random RGBA values
-    let position = [randomX, randomY];
-    let randomR = Math.floor(Math.random() * 30 + 225);
-    let randomG = Math.floor(Math.random() * 30 + 225);
-    let randomB = Math.floor(Math.random() * 30 + 225);
-    let randomA = Math.random() + 0.85;
-    if (randomA > 1) {randomA = 1};
-    let radius;
-
-    // Determine size of star objects
-    if (i % 60 == 0) {
-        // Big star, 10% of sky
-        radius = 1;
-    } else if (galaxy) {
-        // Galaxy haze
-        let randomIndex = Math.floor(Math.random() * 4);
-        randomR = galaxyColors[randomIndex][0];
-        randomG = galaxyColors[randomIndex][1];
-        randomB = galaxyColors[randomIndex][2];
-        randomA = galaxyColors[randomIndex][3];
-        radius = 35;
-    } else {
-        // Small star
-        radius = 0.5;
-    }
-
-    let skyObject = new SkyObject(position, radius, [randomR, randomG, randomB, randomA]);
-    stars.push(skyObject);
-}
-//console.log('STARS have been created:', stars.length);
 
 /* GET USER INPUT */
 function getUserInput() {
@@ -308,17 +356,30 @@ function redGiantHaze() {
 }
 
 function drawSun() {
-    let step = Math.floor(62 * checkSunLuminosity());
+    let step;
+    if (time < 25000000) {
+        let stepFraction = Math.floor((time / 25000000) * 62);
+        //console.log(stepFraction);
+        //if (stepFraction < 30) {stepFraction = 30};
+        step = Math.floor(stepFraction * checkSunLuminosity());
+        sun.r = 255;
+        sun.g = 164 + Math.floor(stepFraction * 1.5);
+        sun.b = 133 + stepFraction * 2;
+        if (sun.g > 255) {sun.g = 255};
+        if (sun.b > 255) {sun.b = 255};
+    } else {
+        step = Math.floor(62 * checkSunLuminosity());
+    }
     sun.radius = Math.floor(sunRadius * checkSunSize());
     let size = sun.radius;
     changeSunColor();
-    //console.log(size, step);
     let a = 0.001;
     let newX = sun.x;
     // If sun is almost at canvas edge, begin rendering aura at negative x-value
     if (sun.x > 999 - step * 3) {
         newX = 0 - (999 - sun.x);
     }
+    // Draw sun radiance
     for (let i = step; i > 0; i--) {
         drawCircle(newX, sun.y, size + (i * 3), rgbaString(sun.r-i,sun.g-i,sun.b-i,a));
         a = a * 1.085;
@@ -413,20 +474,36 @@ function drawHeatOverlay() {
     if (veryHot) {
         drawCircle(planet.x, planet.y, planet.radius + 8, rgbaString(heatR, heatG, heatB, 0.0675));
         drawCircle(planet.x, planet.y, planet.radius + 4, rgbaString(heatR, heatG, heatB, 0.0675));
-        drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.125));
-        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.125));
+        drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.0675));
+        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.0675));
         //console.log('Drawing very hot glow.');
     } 
-    if (hot || warm) {
+    if (hot) {
         drawCircle(planet.x, planet.y, planet.radius + 4, rgbaString(heatR, heatG, heatB, 0.0675));
-        drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.125));
-        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.125));
+        drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(heatR, heatG, heatB, 0.0675));
+        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.0675));
         //console.log('Drawing hot glow.');
+    }
+    if (warm) {
+        drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(heatR, heatG, heatB, 0.0675));
     }
 
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(heatR, heatG, heatB, heatA));
 
     return 1 - heatA;
+}
+
+function updateWaterDisplay() {
+    let waterFormatted = water.toFixed(2);
+    let atmosphereFormatted = atmosphere.toFixed(2);
+    waterDisplay.innerText = `Water: ${waterFormatted} | Gas: ${atmosphereFormatted}`;
+}
+
+function updateMagneticDisplay() {
+    let magneticFieldFormatted = magneticField.toFixed(0);
+    if (magneticFieldFormatted > 100) {magneticFieldFormatted = 100};
+    if (magneticFieldFormatted <= 0) {magneticFieldFormatted = 0};
+    magneticDisplay.innerText = `Magnetic Field: ${magneticFieldFormatted}%`;
 }
 
 function updateVolumeDisplay() {
@@ -438,23 +515,85 @@ function updateVolumeDisplay() {
     volumeDisplay.innerText = `Volume: ${newEarth} Earth (${newVolume} trillion km^3)`;
 }
 
+function determineComposition() {
+    if (volumeEarths > 0.1) {
+        hasAtmosphere = true;
+        hasWater = true;
+    }
+    if (water <= 0) {
+        hasWater = false;
+        hasIce = false;
+    }
+    if (atmosphere <= 0) {
+        hasAtmosphere = false;
+    }
+    if (temp > 200) {
+        waterInAir = true;
+        waterOnLand = false;
+        hasIce = false;
+    } else if (temp > 0) {
+        waterOnLand = true;
+        waterInAir = false;
+        hasIce = false;
+    } else {
+        waterOnLand = true;
+        waterInAir = false;
+        hasIce = true;
+    }
+}
+
 function drawAtmosphere() {
-    let opacity;
-    let color;
+    determineComposition();
+    let opacity = 0;
+    if (hasAtmosphere && waterInAir) {
+        // Steamy atmosphere
+        opacity = atmosphere * 0.9;
+    } else if (hasAtmosphere && waterOnLand) {
+        if (temp > 198) {
+            opacity = atmosphere * 0.9;
+        } else if (temp > 196) {
+            opacity = atmosphere * 0.8;
+        } else if (temp > 194) {
+            opacity = atmosphere * 0.7;
+        } else if (temp > 192) {
+            opacity = atmosphere * 0.6;
+        } else if (temp > 190) {
+            opacity = atmosphere * 0.5;
+        } else if (temp > 188) {
+            opacity = atmosphere * 0.4;
+        } else if (temp > 186) {
+            opacity = atmosphere * 0.3;
+        } else if (temp > 184) {
+            opacity = atmosphere * 0.2;
+        } else {
+            opacity = 0.05;
+        }
+    }
+    /*
     if (volumeEarths >= 1.00) {
-        opacity = 0.5;
+        opacity = 0.25;
     } else if (volumeEarths < 0.1) {
         opacity = 0;
     } else {
-        opacity = volumeEarths / 4;
+        opacity = volumeEarths / 8;
     }
-
-    drawCircle(planet.x, planet.y, planet.radius + 2, rgbaString(135,206,235,opacity));
+    */
+    drawCircle(planet.x, planet.y, planet.radius + 1, rgbaString(255,255,255,opacity));
 }
 
 function drawOcean() {
-
-    drawCircle(planet.x, planet.y, planet.radius, rgbaString(0,90,140, 1));
+    let opacity;
+    if (hasWater && waterOnLand) {
+        opacity = water;
+        if (hasWater && !hasIce) {
+            // Has water but has no ice.
+            drawCircle(planet.x, planet.y, planet.radius, rgbaString(0,50,100, opacity));
+        } else if (hasWater && hasIce) {
+            // Has water but it's ice.
+            drawCircle(planet.x, planet.y, planet.radius, rgbaString(225,225,255, opacity));
+            //console.log("Drawing ice.");
+        }
+    }
     /*
     for (let i = 0; i < 1000; i++) {
         let randomX = Math.floor(Math.random() * planet.radius);
@@ -476,11 +615,11 @@ function drawOcean() {
     */
 }
 
-
 function drawPlanet() {
     drawCircle(planet.x, planet.y, planet.radius, rgbaString(planet.r, planet.g, planet.b, planet.a));
     drawOcean();
-    if (volumeEarths >= 0.1) {drawAtmosphere();}
+    drawAtmosphere();
+    //if (volumeEarths >= 0.1) {drawAtmosphere();}
     let shadowA = 0.9;
     if (temp >= 900) {shadowA = drawHeatOverlay();}
     
@@ -511,6 +650,8 @@ function drawPlanet() {
 
     /* UPDATE STATS */
     updateVolumeDisplay();
+    updateMagneticDisplay();
+    updateWaterDisplay();
     //showNewTime();
 }
 
@@ -614,6 +755,12 @@ function drawStars() {
     }
 }
 
+function drawDebris() {
+    for (d of debris) {
+        drawCircle(d.x, d.y, d.radius, d.color);
+    }
+}
+
 function moveStars(integer) {
     for (s of stars) {
         if (s.x >= canvas.width * 2 - 1) {
@@ -624,42 +771,75 @@ function moveStars(integer) {
     }
 }
 
+function moveDebris(integer) {
+    for (d of debris) {
+        // This will make it move backward.
+        if (d.x <= 0) {
+            d.x = canvas.width * 2 - 1;
+        } else {
+            d.x = d.x - integer;
+        }
+        /*
+        // This will make it move forward.
+        if (d.x >= canvas.width * 2 - 1) {
+            d.x = 0;
+        } else {
+            d.x = d.x + integer;
+        }
+        */
+    }
+}
+
 function reset() {
     incoming = false;
     animating = false;
     setTimeout(() => {
         time = 0;
         planet.radius = 2;
+        planet.color = planetColor;
+        totalImpactVolume = 0;
         tempAdded = 0;
         tempAtmosphere = 0;
+        tempDebris = 0;
+        tempInternalHeat = 0;
+        magneticField = 0;
         calculateNewTemp(0);
         planet.volume = calculateVolume();
         updateVolumeDisplay();
+        updateMagneticDisplay();
+        updateWaterDisplay();
         sun.color = [255,255,255,1];
+        fillDebrisArray();
         clear();
         drawStars();
         sunStart = Math.floor(canvas.width / 4);
         sun.x = sunStart;
         drawSun();
+        drawDebris();
         path = calculatePath360();
-        calculateNewTemp();
+        //calculateNewTemp();
         showNewTemp();
         drawPlanet();
         showNewTime();
         showBombard();
         showForward();
+        resetMessages();
         forceClearLog();
     }, 500);
 }
 
 function setup() {
+    initialize();
     clear();
     drawStars();
     sunStart = Math.floor(canvas.width / 4);
     sun.x = sunStart;
     drawSun();
+    drawDebris();
     path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
     updateVolumeDisplay();
+    updateMagneticDisplay();
+    updateWaterDisplay();
     drawPlanet();
     newTime();
     newTemp();
@@ -682,18 +862,42 @@ function pauseUnpause() {
     }
 }
 
+/* Messages */
 let messageEarthSized = true;
 let messageSunOld = true;
 let messageAtmosphere = true;
+let messageAccretion = true;
+let messageAccreationHeat = true;
+let messageGrowingQuickly = true;
+let messageMainSequence = true;
+let messageMarsSized = true;
+
+function resetMessages() {
+    messageEarthSized = true;
+    messageSunOld = true;
+    messageAtmosphere = true;
+    messageAccretion = true;
+    messageAccreationHeat = true;
+    messageGrowingQuickly = true;
+    messageMainSequence = true;
+    messageMarsSized = true;
+}
+
 
 function checkUpdates() {
     // if (temp < 900 && temp > 850) {resetTempMessages()};
 }
 
 function checkMessages() {
+    // Atmosphere appears inperceptibly at 0.10
     if (volumeEarths >= 0.10 && messageAtmosphere) {newMessage("Your planet is big enough to retain an atmosphere."); messageAtmosphere = false};
     if (volumeEarths == 1.00 && messageEarthSized) {newMessage("Your planet is Earth-sized!"); messageEarthSized = false};
     if (time > 9500000000 && messageSunOld) {newMessage("The sun's hydrogen is nearly gone. Prepare for expansion..."); messageSunOld = false};
+    if (debris.length <= 0 && messageAccretion) {newMessage("Accretion disk has been depleted."); messageAccretion = false};
+    if (debris.length > 0 && temp > 900 && messageAccreationHeat) {newMessage("Millions of tiny collisions are heating your planet."); messageAccreationHeat = false;};
+    if (debris.length < numDebris * 0.99 && messageGrowingQuickly) {newMessage("Your planet is accreting material quickly."); messageGrowingQuickly = false;};
+    if (time > 18000000 && messageMainSequence) {newMessage("Sun is beginning main sequence fusion."); messageMainSequence = false;};
+    if (volumeEarths >= 0.15 && messageMarsSized) {newMessage("Your planet is Mars-sized."); messageMarsSized = false;};
     /*
     if (temp > 1800 && messageVeryHot) {newMessage("Your planet is very hot."); messageVeryHot = false}
     if (temp > 1500 && messageHot) {newMessage("Your planet is hot."); messageHot = false}
@@ -749,14 +953,39 @@ function slower() {
 }
 
 function calculateNewTemp(years) {
+    // TO DO FOLLOW UP
+    if (atmosphere > 0) {
+        tempAtmosphere = (450 * atmosphere);
+    } else {
+        tempAtmosphere = 0;
+    }
+    // TempInternal goes up with each impact. Residual heat is retained for some amount of time.
+    tempInternalHeat = (totalImpactVolume / 15) - (time / 10000000 * 60);
+    // Reduce magnetic field from lost dynamo.
+    if (magneticField > 0) {magneticField = magneticField - (time / 250000000000 / volumeEarths);} else {magneticField = 0;}
+    if (tempInternalHeat < 0) {tempInternalHeat = 0};
+
+    if (time > 100000000 && magneticField <= 0) {
+        atmosphere = atmosphere - (time / 50000000000000 / volumeEarths);
+        if (temp > 0) {
+            water = water - (time / 25000000000000 / volumeEarths);
+        } else {
+            water = water - (time / 100000000000000 / volumeEarths);
+        }
+        if (atmosphere < 0) {atmosphere = 0};
+        if (water < 0) {water = 0};
+    }
+    // DebrisTemp falls quickly once debris field stops striking planet.
+    //if (debris.length <= 0) {tempDebris = 450 - (time / 10000000 * 0.93)};
+    //if (tempDebris < 0) {tempDebris = 0};
     let redGiantDegrees = 0;
     if (tempAdded > 0) {tempAdded = tempAdded - (years * 0.0001);} else {tempAdded = 0;}
-    tempAtmosphere = (90 * volumeEarths) + (-0.666 * o2);
+    //tempAtmosphere = (90 * volumeEarths) + (-0.666 * o2);
     if (time > 9500000000) {
         redGiantDegrees = Math.floor((time - 9500000000) / 250000);
     }
     tempSun = -410 + (time / 100000000 * 9);
-    temp = tempSun + tempAdded + tempAtmosphere + redGiantDegrees;
+    temp = tempSun + tempAdded + tempAtmosphere + redGiantDegrees + tempInternalHeat + tempDebris;
     //console.log(`Sun: ${tempSun}, Atmosphere: ${tempAtmosphere}, Impacts: ${tempAdded}`);
 }
 
@@ -812,6 +1041,7 @@ let bombardCount = 0;
 function animateImpact() {
     clear();
     drawBackground();
+    drawDebris();
     drawImpactObject();
     drawPlanet();
     showNewTemp();
@@ -825,7 +1055,36 @@ function drawStarsSunPlanet() {
     clear(); // Clear canvas from last drawing
     drawStars(); // Draw stars in new position
     drawSun(); // Draw sun in new position
+    if (debris.length > 0) {
+        drawDebris(); // Draw debris in new position
+    }
     drawPlanet(); // Draw planet with new shading
+}
+
+/* ASSUMES DEBRIS OF 10,000 */
+function removeDebris() {
+    let number = timeIncrement / numDebris;
+    for (i = 0; i < number; i++) {
+        // Eliminate debris
+        debris.pop();
+        // Heat planet
+        if (randomPercentage() < 60) {
+            tempAdded = tempAdded + 1;
+        } else {
+            tempAdded = tempAdded + 1;
+        }
+        totalImpactVolume = totalImpactVolume + 5.5;
+        let randomIncrease = Math.random();
+        magneticField = magneticField + 0.01 * randomIncrease;
+        if (water < 1.00) {
+            water = water + 0.0001;
+        }
+        if (atmosphere < 1.00) {
+            atmosphere = atmosphere + 0.0001;
+        }
+        // Voluminize planet
+        calculatePlanetRadiusByVolume(3);
+    }
 }
 
 function incrementTime(integer) {
@@ -840,8 +1099,12 @@ function newTime() {
 function animateForward() {
     moveSun(1);
     moveStars(1);
+    moveDebris(1);
     path = calculatePath360(); // Calculate new sun position (defined by 360 degrees);
     drawStarsSunPlanet();
+    if (debris.length > 0) {
+        removeDebris();
+    }
     newTime();
     newTemp();
     if (sun.x === sunStart) {
@@ -909,11 +1172,13 @@ function createImpactObject(size) {
         impactObjectSize = Math.floor(Math.random() * 3) + 2;
     } else if (size == 7) {
         impactObjectSize = Math.floor(Math.random() * 3) + 5;
-    } else {
+    } else if (size == 9) {
         impactObjectSize = Math.floor(Math.random() * 3) + 7;
+    } else {
+        impactObjectSize = Math.floor(Math.random() * 3) + 12;
     }
     //let impactObjectSize = Math.floor(Math.random() * size) + 1;
-    impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [75,75,75,1]));
+    impactObjects.push(new SkyObject([0,canvas.height/2], impactObjectSize, [10,10,10,1]));
     velocity = Math.floor(Math.random() * 2) + 2; // Between 2 and 3
     if (randomPercentage(50) < 50) {
         velocity = 0 - velocity;
@@ -931,6 +1196,7 @@ function calculateTempAdded(size, speed) {
 
 function drawImpactObject() {
     let impactObject = impactObjects[0];
+    if (impactLevel == 0) {drawCircle(impactObject.x, impactObject.y, impactObject.radius + 1, rgbaString(255,255,255,0.25));}
     drawCircle(impactObject.x, impactObject.y, impactObject.radius, impactObject.color);
 
     //shadow(impactObject);
@@ -960,18 +1226,61 @@ function drawImpactObject() {
     
     if (velocity > 0 && impactObject.x - impactObject.radius >= planet.x - planet.radius ||
         velocity < 0 && impactObject.x + impactObject.radius <= planet.x + planet.radius) {
-        calculatePlanetRadius(impactObject);
+        // TO DO FOLLOW UP
+        if (velocity < 0) {
+            magneticField = magneticField + (impactObject.radius ** 3 / 550);
+            water = water + (impactObject.radius ** 3 / 50000)
+            atmosphere = atmosphere + (impactObject.radius ** 3 / 15000);
+        } else {
+            magneticField = magneticField + (impactObject.radius ** 3 / 500);
+            water = water + (impactObject.radius ** 3 / 50000)
+            atmosphere = atmosphere + (impactObject.radius ** 3 / 15000);
+
+        }
+        if (water > 1.00) {
+            water = 1.00;
+        }
+        if (atmosphere > 1.00) {
+            atmosphere = 1.00;
+        }
+        // If impact object > planet, then catastrophe
+        let catastrophe = impactObject.radius >= planet.radius;
+        let impactRadius = impactObject.radius;
+        //console.log(catastrophe);
+        if (!catastrophe) {calculatePlanetRadius(impactObject);};
         destroyImpactObject();
         incoming = false;
         impactLevel = 0;
         clear();
         drawBackground();
-        drawPlanet();
+        if (debris.length > 0) {
+            drawDebris();
+        }
         let impactTemp = calculateTempAdded(impactObject.radius / 2, velocity);
         tempAdded = tempAdded + calculateTempAdded(impactObject.radius / 2, velocity);
         newTemp(0);
-        showBombard();
-        let message = 'Impact! Average temperature increased by ' + impactTemp + ' F.';
+        let message;
+        if (catastrophe) {
+            planet.radius = 0;
+            message = "Oh no! You've obliterated your planet."
+            animating = false;
+            hideBombard();
+            hideForward();
+        } else {
+            message = 'Impact! Surface temperature spike: ' + impactTemp + 'F.';
+            showBombard();
+            // It takes about 55,000 impact volume to create an Earth-sized planet.
+            totalImpactVolume = totalImpactVolume + (impactRadius ** 3);
+            console.log("====================");
+            console.log("Impact Volume:",totalImpactVolume);
+            console.log("Internal Heat:",tempInternalHeat);
+            /*
+            console.log("Debris Temp:",tempDebris);
+            console.log("Atmosphere:", tempAtmosphere);
+            console.log("Sun Temp:", tempSun);
+            */
+        }
+        drawPlanet();
         newMessage(message);
     }
 }
@@ -984,8 +1293,16 @@ function calculatePlanetRadius(impactObject) {
     }
     planet.radius = newRadius;
     planet.volume = newVolume;
-    //console.log("New planet radius:", planet.radius);
-    //console.log("New planet volume:", planet.volume);
+}
+
+function calculatePlanetRadiusByVolume(number) {
+    let newVolume = planet.volume + number;
+    let newRadius = Math.floor(Math.cbrt((3 * newVolume) / (4 * Math.PI)));
+    if (newRadius > planet.radius && debris.length == 0) {
+        newMessage('Planet size has increased!');
+    }
+    planet.radius = newRadius;
+    planet.volume = newVolume;
 }
 
 function moveImpactObject() {
