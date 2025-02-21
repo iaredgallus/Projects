@@ -8,6 +8,7 @@ const playlistId = '3DvVwlxBtWk8dikEbWTlV2';
 const result = await getToken();
 const getAccessToken = result.access_token;
 const noBullets = { listStyle: "none" }; // CSS
+const trackInfoStyle = { backgroundColor: "#111111", padding: "2rem", borderRadius: "10px" }
 
 async function getToken() {
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -153,24 +154,24 @@ function SearchByTrack(props) {
 
     return (
         <>
-            <form onSubmit={handleSubmit}>
+            <h2>Search for a Track</h2>
+            <form onSubmit={handleSubmit} style={{marginBottom: "1rem"}}>
                 <input id="track_search" value={track} onChange={handleChangeTrack}/>
-                <button type="submit">Search</button>
+                <button className="submit-button" type="submit">Search</button>
             </form>
             <ul>
                 {titles.map((item, index) => (
                     <li style={noBullets} key={index} data-value={item[3]} onClick={handleSelectTrack}>{item[0]} - {item[1]} ({item[2]})</li>
                 ))}
             </ul>
-            <div id="track_info" className={(trackInfoVisible) ? "" : "hidden"} style={{marginTop: "2rem"}}>
-                <hr />
+            <div id="track_info" className={(trackInfoVisible) ? "" : "hidden"} style={trackInfoStyle}>
                 <img src={trackInfo.image} height={128} alt="Album Cover"/>
                 <div>{trackInfo.name}</div>
                 <div style={{fontStyle:"italic"}}>{trackInfo.album}</div>
                 <div>{trackInfo.artist}</div>
                 <div>{trackInfo.date}</div>
-                <div id="actions" style={{marginTop:"1rem"}}>
-                  <button onClick={handleAddToPlaylist} className={(props.loggedIn && !success && !alreadyOnPlaylist) ? "" : "hidden"}>Add to Playlist</button>
+                <div id="actions">
+                  <button id="add-to-playlist" onClick={handleAddToPlaylist} className={(props.loggedIn && !success && !alreadyOnPlaylist) ? "" : "hidden"}>Add to Playlist</button>
                   <div className={(success) ? "" : "hidden"}>Nice! Track added.</div>
                   <div className={(alreadyOnPlaylist) ? "" : "hidden"}>Someone has already recommended this track.</div>
                 </div>

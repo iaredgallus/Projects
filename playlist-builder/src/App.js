@@ -86,20 +86,19 @@ function App() {
 
   return (
     <div className="App">
-        <h2>Search for a Song</h2>
-        <div className={trackVisible ? "" : "hidden"}>
-          <SearchByTrack loggedIn={loggedIn} postAccessToken={postAccessToken} postRefreshToken={postRefreshToken} />
-        </div>
-        <div style={{marginTop: "4rem"}} className={(loggedIn) ? "hidden" : ""}>
-          <hr />
+        <h1>Recommend a Song</h1>
+        <div id="login" className={(loggedIn) ? "hidden" : ""}>
           <form onSubmit={handleTryPassword} className={(allowed) ? "hidden" : ""}>
             <div>If you want to add a song to my Recommendations playlist, you'll need to ask me for the password.</div>
-            <div>Enter password below.</div>
+            <div style={{marginBottom: "1rem"}}>Enter the password below.</div>
             <input id="password" value={givenPassword} onChange={handleGivenPassword} />
-            <button type="submit">Enter</button>
+            <button id="password-button" style={{ display:"block", margin:"0.5rem auto"}} className="submit-button" type="submit">Enter</button>
           </form>
           <div className={(badPassword) ? "" : "hidden"}>That didn't work.</div>
           <div className={(loggedIn || !allowed) ? "hidden" : ""}>That was it!<br />Next, <a href={loginUrl}>connect to Spotify</a> to add songs directly to my Recommendations playlist.<br />(You're using my API tokens, so be nice.)</div>
+        </div>
+        <div id="search" className={trackVisible ? "" : "hidden"}>
+          <SearchByTrack loggedIn={loggedIn} postAccessToken={postAccessToken} postRefreshToken={postRefreshToken} />
         </div>
     </div>
   );

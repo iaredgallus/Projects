@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+  max-width: 800px;
+  margin: auto;
+  color: white;
+  font-size: 16px;
 }
 
 .App-logo {
@@ -35,4 +39,84 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+h1 {
+  margin: 2rem;
+}
+
+ul {
+  margin: 1rem 0;
+  padding: 1rem 0;
+}
+
+li {
+  max-width: 600px;
+  margin: auto;
+  padding: 10px;
+  color: #eeeeee;
+}
+
+li:hover {
+  background-color: rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+}
+
+#search {
+  margin: 2rem 0 1rem 0;
+}
+
+input {
+  padding: 7px 10px;
+  border-radius: 15px;
+  border: 0;
+  background-color: #444444;
+  color: white;
+  font-size: 14px;
+}
+
+button {
+  padding: 7px 10px;
+  border: 0;
+  background-color: #1DB954;
+  color: black;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #bbbbbb;
+  transition: background-color 0.1s ease-in-out;
+}
+
+#password-button {
+  background-color: #111111;
+  color: white;
+  font-size: 14px;
+}
+
+#password-button:hover {
+  background-color: #555555;
+}
+
+a {
+  color: #1DB954;
+}
+
+.submit-button {
+  margin-left: 10px;
+}
+
+#login {
+  background-color: #666666;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+#login input {
+  background-color: #eeeeee;
+}
+
+#add-to-playlist {
+  margin-top: 1rem;
 }
