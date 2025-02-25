@@ -8,7 +8,7 @@ const playlistId = '3DvVwlxBtWk8dikEbWTlV2';
 const result = await getToken();
 const getAccessToken = result.access_token;
 const noBullets = { listStyle: "none" }; // CSS
-const trackInfoStyle = { backgroundColor: "#111111", padding: "2rem", borderRadius: "10px" }
+const trackInfoStyle = { backgroundColor: "#111111", padding: "2rem 0", maxWidth: 600, borderRadius: "15px", margin: "auto" }
 
 async function getToken() {
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -73,6 +73,8 @@ async function pushToPlaylist(postAccessToken, selectedTrack) {
   return await response.json();
 }
 
+/* COMPONENT BEGIN */
+
 function SearchByTrack(props) {
     const [ track, setTrack ] = useState('');
     const [ titles, setTitles ] = useState([]);
@@ -81,6 +83,7 @@ function SearchByTrack(props) {
     const [ trackInfoVisible, setTrackInfoVisible ] = useState(false);
     const [ success, setSuccess ] = useState(false);
     const [ alreadyOnPlaylist, setAlreadyOnPlaylist ] = useState(false);
+    //const [ playlist, setPlaylist ] = useState([]);
     const postAccessToken = props.postAccessToken;
     
     function handleChangeTrack(e) {
@@ -99,14 +102,15 @@ function SearchByTrack(props) {
 
     function handleAddToPlaylist(e) {
       e.preventDefault();
+      //setPlaylist([]);
       const trackId = selectedTrack.split("tracks/")[1];
       let alreadyExists = false;
       playlistToArray().then(array => {
         for (let i of array) {
+          //setPlaylist((prev) => [...prev, i]);
           if (i === trackId) {
             alreadyExists = true;
             setAlreadyOnPlaylist(true);
-            break;
           }
         }
         if (!alreadyExists) {
@@ -115,6 +119,7 @@ function SearchByTrack(props) {
           setAlreadyOnPlaylist(false);
         }
       });
+      //console.log(playlist);
     }
 
     function handleSubmit(e) {
@@ -156,19 +161,20 @@ function SearchByTrack(props) {
         <>
             <h2>Search for a Track</h2>
             <form onSubmit={handleSubmit} style={{marginBottom: "1rem"}}>
-                <input id="track_search" value={track} onChange={handleChangeTrack}/>
+                <input id="track-search" value={track} onChange={handleChangeTrack}/>
                 <button className="submit-button" type="submit">Search</button>
             </form>
+            <h2>Results</h2>
             <ul>
                 {titles.map((item, index) => (
                     <li style={noBullets} key={index} data-value={item[3]} onClick={handleSelectTrack}>{item[0]} - {item[1]} ({item[2]})</li>
                 ))}
             </ul>
-            <div id="track_info" className={(trackInfoVisible) ? "" : "hidden"} style={trackInfoStyle}>
+            <div id="track-info" className={(trackInfoVisible) ? "" : "hidden"} style={trackInfoStyle}>
                 <img src={trackInfo.image} height={128} alt="Album Cover"/>
                 <div>{trackInfo.name}</div>
                 <div style={{fontStyle:"italic"}}>{trackInfo.album}</div>
-                <div>{trackInfo.artist}</div>
+                <div className="artist-text">{trackInfo.artist}</div>
                 <div>{trackInfo.date}</div>
                 <div id="actions">
                   <button id="add-to-playlist" onClick={handleAddToPlaylist} className={(props.loggedIn && !success && !alreadyOnPlaylist) ? "" : "hidden"}>Add to Playlist</button>

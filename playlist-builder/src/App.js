@@ -1,17 +1,36 @@
 //import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
+import { Buffer } from 'buffer';
 //import SearchByAlbum from './SearchByAlbum';
 import SearchByTrack from './SearchByTrack';
+import Playlist from './Playlist';
 let isLoggedIn = false;
 const clientId = '9eecd97b0c1f48feae4d1917c29c5a0d';
 const clientSecret = 'b73a12900a264892a605ca6c9417964f';
+const playlistId = '3DvVwlxBtWk8dikEbWTlV2';
 const authString = btoa(`${clientId}:${clientSecret}`);
 const redirectUri = 'http://localhost:3000'; // THIS NEEDS TO BE UPDATED IF PUTTING ON SERVER
+const result = await getToken();
+const searchToken = result.access_token;
 let accessToken = null;
 let refreshToken = null;
 
 // EXTRACT TOKENS BEFORE LOADING APP
+async function getToken() {
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    body: new URLSearchParams({
+      'grant_type': 'client_credentials',
+    }),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + (Buffer.from(clientId + ':' + clientSecret).toString('base64')),
+    },
+  });
+  return response.json();
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 let getCode = urlParams.get("code");
 
@@ -57,7 +76,9 @@ function App() {
   const [ allowed, setAllowed ] = useState(false);
   const [ badPassword, setBadPassword ] = useState(false);
   const password = "recommend!";
-  const appRedirectUri = redirectUri;
+  //const appRedirectUri = redirectUri;
+  //const getAccessToken = searchToken;
+  const playlist = playlistId;
   const loginUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=playlist-modify-public&state=random_string`;
 
   useEffect(() => {
@@ -87,6 +108,9 @@ function App() {
   return (
     <div className="App">
         <h1>Recommend a Song</h1>
+        <div id="playlist" className={(loggedIn) ? "" : "hidden" }>
+          <Playlist postAccessToken={postAccessToken} playlist={playlist}/>
+        </div>
         <div id="login" className={(loggedIn) ? "hidden" : ""}>
           <form onSubmit={handleTryPassword} className={(allowed) ? "hidden" : ""}>
             <div>If you want to add a song to my Recommendations playlist, you'll need to ask me for the password.</div>
