@@ -8,6 +8,8 @@ function App() {
   const [cityName, setCityName] = useState('');
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
+  const [bars, setBars] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleCityValue = (e) => {
     setCityValue(e.target.value);
@@ -21,8 +23,12 @@ function App() {
     setCountryValue(e.target.value);
   }
 
-  async function searchCity(searchValue) {
+  async function searchCity(event: Event) {
     event.preventDefault();
+    setLoading(true);
+    setBars([]);
+
+    // FETCH CITY DATA
     const url = `https://nominatim.openstreetmap.org/search?city=${cityValue}&state=${stateValue}&country=${countryValue}&format=json&addressdetails=1&limit=10`;
     const response = await fetch(url, {
       headers: {
@@ -31,7 +37,9 @@ function App() {
     });
 
     const data = await response.json();
-    console.log(data);
+    //console.log(data);
+
+    // IF CITY IS NOT NULL
     if (data.length > 0) {
       setLat(data[0].lat);
       setLon(data[0].lon);
@@ -39,13 +47,44 @@ function App() {
     } else {
       setCityName('None');
     }
-    //console.log(lat, lon);
   }
 
+  async function searchBars() {
+    const barsUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["amenity"="lgbtq+ bar"](around:10000,${lat},${lon});node["amenity"="bar"]["lgbtq"="primary"](around:10000,${lat},${lon}););out body;>;out skel qt;`;
+    const barsResponse = await fetch(barsUrl, {
+      headers: {
+        'User-Agent': 'gaybarfinder'
+      }
+    });
+
+    const barsData = await barsResponse.json();
+    let newItems = [];
+    for (let b of barsData.elements) {
+      let newItem = {
+        name: b.tags.name,
+        number: b.tags['addr:housenumber'],
+        street: b.tags['addr:street'],
+        city: b.tags['addr:city'],
+        state: b.tags['addr:state'],
+        postcode: b.tags['addr:postcode']
+      };
+      newItems.push(newItem);
+    }
+    //console.log('TEMPORARY ARRAY:', newItems);
+    setBars(prev => [...prev, ...newItems]);
+    setLoading(false);
+  }
+
+
   useEffect(() => {
-    console.log(cityValue, countryValue, lat, lon);
+    if (cityName !== '') {
+      searchBars();
+    }
   }, [cityName]);
 
+  useEffect(() => {
+    //console.log('BARS STATE ARRAY:', bars);
+  }, [bars]);
 
   return (
     <>
@@ -55,7 +94,18 @@ function App() {
         <input placeholder='State' type='text' size='10' onChange={handleStateValue}/>
         <input placeholder='Country' type='text' size='10' onChange={handleCountryValue}/>
         <button type='submit'>Search</button>
-        <p>Match: <b>{cityName}</b></p>
+        {cityName === '' ? <p>No City Selected</p> : <p><b>{cityName}</b></p>}
+        {loading ? <p>Loading Results...</p> : <></>}
+        {cityName === '' || bars.length > 0 || loading ?
+        <ul>
+          {bars.map((bar, index) => (<li key={index}>
+            <a href={`https://google.com/maps/search/${bar.name}+${cityName}`} target='_blank'>{bar.name}</a> 
+            &nbsp;{bar.number || ''} {bar.street || ''} {bar.city || ''} {bar.state || ''} {bar.postcode}
+          </li>
+          ))}
+        </ul>
+        : 
+        <p>No Results</p>}
       </form>
     </>
   )
