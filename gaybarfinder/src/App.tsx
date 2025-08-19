@@ -50,7 +50,15 @@ function App() {
   }
 
   async function searchBars() {
-    const barsUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["amenity"="lgbtq+ bar"](around:10000,${lat},${lon});node["amenity"="bar"]["lgbtq"="primary"](around:10000,${lat},${lon}););out body;>;out skel qt;`;
+    const barsUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(nwr["amenity"~"^(bar|nightclub)$"]["lgbtq"="primary"](around:20000,${lat},${lon}););out body;out tags center qt;`
+    /* `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(` + 
+        `node["amenity"="lgbtq+ bar"](around:10000,${lat},${lon});` + 
+        `node["amenity"="bar"]["lgbtq"="primary"](around:10000,${lat},${lon});` +
+        `node["amenity"="nightclub"]["lgbtq"="primary"](around:10000,${lat},${lon});` +
+        `way["amenity"="lgbtq+ bar"](around:10000,${lat},${lon});` + 
+        `way["amenity"="bar"]["lgbtq"="primary"](around:10000,${lat},${lon});` +
+        `way["amenity"="nightclub"]["lgbtq"="primary"](around:10000,${lat},${lon});` +
+      `);out body;>;out tags center qt;`; */
     const barsResponse = await fetch(barsUrl, {
       headers: {
         'User-Agent': 'gaybarfinder'
@@ -59,7 +67,15 @@ function App() {
 
     const barsData = await barsResponse.json();
     let newItems = [];
+    const seen = new Set();
+
     for (let b of barsData.elements) {
+      const key = `${b.type}/${b.id}`;
+      if (seen.has(key)) {
+        continue;
+      } else {
+        seen.add(key);
+      }
       let newItem = {
         name: b.tags.name,
         number: b.tags['addr:housenumber'],
